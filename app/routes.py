@@ -124,32 +124,33 @@ def stats():
     if num_pages == -1:
         flash('No user found. Try another username.')
         return redirect(url_for('login'))
-    else:
-        start = time.time()
-        asyncio.set_event_loop(asyncio.SelectorEventLoop())
-        loop = asyncio.get_event_loop()
-        future = asyncio.ensure_future(get_user_ratings(username, num_pages))
-        film_objects = loop.run_until_complete(future)
-        end = time.time()
-        print('Time to construct film_objects is {time}'.format(time=end-start))
-        flash('User {username} has logged {no_films} films'.format(username=username, no_films=len(film_objects)))
 
-        start = time.time()
-        loop = asyncio.get_event_loop()
-        future = asyncio.ensure_future(update_database(film_objects))
-        loop.run_until_complete(future)
-        end = time.time()
-        print('Time to update database is {time}'.format(time=end-start))
+    return render_template('stats.html', title=title, num_pages=num_pages, username=username)
 
-        start = time.time()
+
+@app.route('/directors', methods=["GET"])
+def directors():
+
+    async def inner():
+        username = session['username']
+        num_pages = get_page_count(username)
+
+        num_pages = get_page_count(username)
+        film_objects = await get_user_ratings(username, num_pages)
+        await update_database(film_objects)
+
+        film_objects = await get_user_ratings(username, num_pages)
         director_dict = generate_director_dictionary(film_objects)
         sorted_directors = sort_directors_by_biased_rating(director_dict.copy())
         top_directors_list = get_list_of_top_directors(sorted_directors, 150)
-        end = time.time()
-        print('Time to generate and sort directors is {time}'.format(time=end-start))
+        return top_directors_list
 
-    return render_template('stats.html', title=title, num_pages=num_pages, username=username,
-                           top_directors_list=top_directors_list)
+    asyncio.set_event_loop(asyncio.SelectorEventLoop())
+    loop = asyncio.get_event_loop()
+    future = asyncio.ensure_future(inner())
+    top_directors_list = loop.run_until_complete(future)
+
+    return jsonify(top_directors_list)
 
 
 @app.route('/test/<text>', methods=['GET'])
