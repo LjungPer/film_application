@@ -3,7 +3,63 @@
     <h1>Stats for user {{ username }}</h1>
     <div><p>User {{ username }} has {{ num_pages }} pages of ratings.</p></div>
     <div><p>A simple app where you provide your letterboxd username, and we provide you with some data.</p></div>
-    {% for director in top_directors_list %}
-        <div><p>{{ director }}</p></div>
-    {% endfor %}
+
+    <p id="loading_text">Loading</p>
+    <div id="directors"></div>
+
+    <script>
+        // Runs when page loads
+        $(function() {
+
+            var counter = 0;
+            function updateLoadingText() {
+                var ellipsis = ["", ".", "..", "..."];
+                var p = document.getElementById("loading_text");
+                p.textContent = "Loading" + ellipsis[counter];
+                counter++;
+                if (counter == ellipsis.length) {
+                    counter = 0;
+                }
+            }
+
+            // run update loading text at half a second intervals to animate
+            var timerId = setInterval(updateLoadingText, 500);
+
+            // function to create table html from json
+            var createDirectorsTableFromJson = function(data) {
+                var table = document.createElement("table");
+
+                for (var i = 0; i < data.length; i++) {
+                    var tr = table.insertRow();
+
+                    for (var j = 0; j < 2; j++) {
+                        var cell = tr.insertCell();
+                        cell.innerHTML = data[i][j]; // 0: name, 1: rating
+                    }
+                }
+
+                return table;
+            }
+
+            var fetchDirectors = function() {
+                console.log("fetching directors data");
+                $.ajax({
+                    type: "GET",
+                    url: "/directors"
+                }).done(function(jsonData) {
+                    console.log("success ");
+                    clearInterval(timerId);
+                    $("#loading_text").hide();
+                    var table = createDirectorsTableFromJson(jsonData);
+                    var div = document.getElementById("directors");
+                    div.innerHTML = "";
+                    div.appendChild(table);
+                }).fail(function() {
+                    console.log("failed")
+                });
+            }
+
+            fetchDirectors();
+        })
+    </script>
 {% endblock %}
