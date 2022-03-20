@@ -1,0 +1,18 @@
+<html>
+    <head></head>
+    <body>
+        <div>
+            <a href="/login">New user</a>
+        </div>
+        <hr>
+    </body>
+</html>
+
+{% block content %}
+    <h1>Stats for user {{ username }}</h1>
+    <div><p>User {{ username }} has {{ num_pages }} pages of ratings.</p></div>
+    <div><p>A simple app where you provide your letterboxd username, and we provide you with some data.</p></div>
+    {% for director in top_directors_list %}
+        <div><p>{{ director }}</p></div>
+    {% endfor %}
+{% endblock %}
