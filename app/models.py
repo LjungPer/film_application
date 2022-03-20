@@ -1,5 +1,5 @@
 from app import db
-from flask_login import UserMixin
+#from flask_login import UserMixin
 
 director_film = db.Table('director_film',
                          db.Column('letterboxd_id', db.Integer, db.ForeignKey('film.letterboxd_id')),

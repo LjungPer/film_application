@@ -1,7 +1,7 @@
 from flask import render_template, flash, redirect, session, url_for, render_template_string
 from app import app
 from app.forms import LoginForm
-from flask_login import current_user, login_user
+#from flask_login import current_user, login_user
 from app.database import update_database
 from app.scraping import get_page_count, get_user_ratings
 from app.director import *
@@ -31,7 +31,7 @@ def login():
     if form.validate_on_submit():
         username = form.username.data
         session['username'] = username
-        return redirect(url_for('loading', text='user_data'))
+        return redirect(url_for('stats', text='user_data'))
     else:
         return render_template('login.html', title='Load data', form=form)
 
