@@ -31,7 +31,7 @@ def login():
     if form.validate_on_submit():
         username = form.username.data
         session['username'] = username
-        return redirect(url_for('stats', text='user_data'))
+        return redirect(url_for('stats'))
     else:
         return render_template('login.html', title='Load data', form=form)
 
