@@ -1,8 +1,7 @@
-from flask import render_template, flash, redirect, session, url_for, render_template_string
+from flask import render_template, flash, redirect, session, url_for, jsonify
 from app import app
 from app.forms import LoginForm
-#from flask_login import current_user, login_user
-from app.database import update_database
+from app.database import update_database_with_new_films
 from app.scraping import get_page_count, get_user_ratings
 from app.director import *
 import asyncio
@@ -137,7 +136,7 @@ def directors():
 
         num_pages = get_page_count(username)
         film_objects = await get_user_ratings(username, num_pages)
-        await update_database(film_objects)
+        await update_database_with_new_films(film_objects)
 
         film_objects = await get_user_ratings(username, num_pages)
         director_dict = generate_director_dictionary(film_objects)
