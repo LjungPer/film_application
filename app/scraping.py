@@ -24,8 +24,8 @@ def get_page_count(username):
 
     try:
         # find_all finds all instances of a tag on a page
-        page_link = soup.findAll("li", attrs={"class", "paginate-page"})[-1]    # returns the 1  2  3  ...  23 bar (23 as [-1])
-        num_pages = int(page_link.find("a").text.replace(',', ''))              # Not sure if replace is needed here (but doesnt hurt at least)
+        page_link = soup.findAll("li", attrs={"class", "paginate-page"})[-1]
+        num_pages = int(page_link.find("a").text.replace(',', ''))
     except IndexError:
         # There is no bar if there is only one page
         num_pages = 1

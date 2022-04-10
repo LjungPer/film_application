@@ -1,13 +1,17 @@
 from app.models import *
 from app import objects
 
-def generate_director_dictionary(film_objects):
+''' Suggestion: implement a class named User that simply has these attributes and functions. Should be more structured 
+    than just random functions put into a file. '''
+
+
+def generate_director_dictionary(user_films):
     # Only time consuming thing here is to query all films on first line.
 
     db_films = Film.query.all()
     db_film_director_dict = {film.letterboxd_id: film.director for film in db_films}
     director_dict = {}
-    for film in film_objects:
+    for film in user_films:
         if int(film['letterboxd_id']) in db_film_director_dict:
             directors = db_film_director_dict[int(film['letterboxd_id'])]
             for director in directors:
