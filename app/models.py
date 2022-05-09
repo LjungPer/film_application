@@ -1,11 +1,12 @@
 from app import db
 
-director_film = db.Table('director_film',
-                         db.Column('letterboxd_id', db.Integer, db.ForeignKey('film.letterboxd_id')),
-                         db.Column('director_id', db.Integer, db.ForeignKey('director.director_id')))
+director_film_table = db.Table('director_film',
+                               db.Column('letterboxd_id', db.Integer, db.ForeignKey('film.letterboxd_id')),
+                               db.Column('director_id', db.Integer, db.ForeignKey('director.director_id')))
 
 
 class Director(db.Model):
+    ''' rename director_id to e.g. letterboxd_id or just id '''
     director_id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64))
 
@@ -17,7 +18,7 @@ class Film(db.Model):
     letterboxd_id = db.Column(db.Integer, primary_key=True)
     tmdb_id = db.Column(db.Integer, index=True, unique=True)
     title = db.Column(db.String(128))
-    director = db.relationship('Director', secondary=director_film, backref=db.backref('films', lazy='dynamic'))
+    director = db.relationship('Director', secondary=director_film_table, backref=db.backref('films', lazy='dynamic'))
 
     def __repr__(self):
         return '<Film {}>'.format(self.title)

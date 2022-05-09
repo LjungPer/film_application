@@ -2,6 +2,9 @@
 {% block content %}
     <h1>Stats for user {{ username }}</h1>
     <div><p>User {{ username }} has {{ num_pages }} pages of ratings.</p></div>
+    <a href="https://letterboxd.com/kattihatt2/" class="circle">
+	    <img height="128" width="128" src={{ avatar_url }}>
+    </a>
     <div><p>A simple app where you provide your letterboxd username, and we provide you with some data.</p></div>
 
     <p id="loading_text">Loading</p>

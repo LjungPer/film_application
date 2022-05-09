@@ -1,10 +1,11 @@
 from app.models import *
 from app import objects
+from app.decorators import timed
 
 ''' Suggestion: implement a class named User that simply has these attributes and functions. Should be more structured 
     than just random functions put into a file. '''
 
-
+@timed
 def generate_director_dictionary(user_films):
     # Only time consuming thing here is to query all films on first line.
 

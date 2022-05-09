@@ -1,6 +1,6 @@
 from app import db
 from app.models import Film, Director, Tv, Miscellaneous
-from app.scraping import get_user_ratings
+from app.scraping import get_user_films
 from app.database import scrape_and_add_tmdb_info_to
 import asyncio
 
@@ -41,7 +41,7 @@ def get_director_in_db_with_name(name):
 def test_tmdb_info_adding():
 
     async def inner():
-        film_objects = await get_user_ratings('kattihatt2', 1)
+        film_objects = await get_user_films('kattihatt2', 1)
         print(film_objects[0])
         await scrape_and_add_tmdb_info_to([film_objects[0]])
         print(film_objects[0])
