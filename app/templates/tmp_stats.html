@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1>Stats for user {{ username }}</h1>
+    <div><p>User {{ username }} has {{ num_pages }} pages of ratings.</p></div>
+    <a href="https://letterboxd.com/kattihatt2/" class="circle">
+	    <img height="128" width="128" src={{ avatar_url }}>
+    </a>
+    <div><p>A simple app where you provide your letterboxd username, and we provide you with some data.</p></div>
+
+    <div id="buttons">
+       <button class="action_btn" onclick='topDirectorsButton()'>Top directors</button>
+        <form action="" method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <p>{{ form.submit() }}</p>
+    </form>
+    </div>
+    <p id="loading_text"></p>
+    <div id="directors"></div>
+
+    <script>
+
+        // function to create table html from json
+        var createDirectorsTableFromJson = function(data) {
+            var table = document.createElement("table");
+
+            for (var i = 0; i < data.length; i++) {
+                var tr = table.insertRow();
+
+                for (var j = 0; j < 2; j++) {
+                    var cell = tr.insertCell();
+                    cell.innerHTML = data[i][j]; // 0: name, 1: rating
+                }
+            }
+
+            return table;
+        }
+
+        var fetchDirectors = function() {
+            console.log("fetching directors data");
+            $.ajax({
+                type: "GET",
+                url: "/directors"
+            }).done(function(jsonData) {
+                console.log("success ");
+                $("#loading_text").hide();
+                var table = createDirectorsTableFromJson(jsonData);
+                var div = document.getElementById("directors");
+                div.innerHTML = "";
+                div.appendChild(table);
+            }).fail(function() {
+                console.log("failed")
+            });
+        }
+
+
+
+        function topDirectorsButton() {
+            var p = document.getElementById("loading_text");
+            p.textContent = "Loading";
+            fetchDirectors();
+        }
+
+    </script>
+
+{% endblock %}

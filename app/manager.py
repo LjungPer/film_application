@@ -1,19 +1,48 @@
 import re
 from bs4 import BeautifulSoup, SoupStrainer
-from app.database import extract_films_not_in_db, add_films_to_db
-from app.scraping import scrape_letterboxd_urls_of_films, scrape_pages_of_user_films_by_date
-from app.models import Film
-import app.objects as objects
-from app.decorators import timed
+from app.database import extract_films_not_in_db, add_films_to_db, user_is_not_in_db, add_user_to_db, update_db_user
+from app.scraping import scrape_letterboxd_urls_of_films, scrape_pages_of_user_films_by_date, get_page_count, get_user_avatar_src
+import asyncio
 
 
+def set_up_user(username):
+
+    if user_is_not_in_db(username):
+        num_pages = get_page_count(username)
+        avatar_url = get_user_avatar_src(username)
+        logged_films = get_user_films(username)
+        add_user_to_db(username, logged_films, num_pages, avatar_url)
+
+def update_user(username):
+
+    num_pages = get_page_count(username)
+    avatar_url = get_user_avatar_src(username)
+    logged_films = get_user_films(username)
+    update_db_user(username, logged_films, num_pages, avatar_url)
+
+
+def get_user_films(username):
+
+    async def inner():
+        pages_of_user_films_by_date = await scrape_pages_of_user_films_by_date(username)
+        user_films = get_user_films_from_scraped_pages(pages_of_user_films_by_date)
+        return user_films
+
+    asyncio.set_event_loop(asyncio.SelectorEventLoop())
+    loop = asyncio.get_event_loop()
+    future = asyncio.ensure_future(inner())
+    user_films = loop.run_until_complete(future)
+
+    return user_films
+
+'''
 async def get_user_films(username):
 
     pages_of_user_films_by_date = await scrape_pages_of_user_films_by_date(username)
     user_films = get_user_films_from_scraped_pages(pages_of_user_films_by_date)
 
     return user_films
-
+'''
 
 def get_user_films_from_scraped_pages(scraped_pages):
     user_films = []

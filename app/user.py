@@ -2,8 +2,9 @@ import asyncio
 from app.manager import get_user_films
 from app.decorators import timed
 from app.database import get_directors_of_films
+from app.models import User
 
-class User:
+class LocUser:
     def __init__(self, username):
         self._username = username
 
@@ -51,6 +52,14 @@ class User:
         self._logged_films = user_films
 
 
+def get_top_directors(username):
+    user = User.query.get(username)
+    logged_films = user.logged_films
+    user_directors = create_director_dictionary(logged_films)
+    sorted_directors = sort_directors_by_biased_rating(user_directors)
+    return get_top_directors_from_tmp(sorted_directors)
+
+
 ''' Help with this function... Variable names, structure etc. '''
 @timed
 def create_director_dictionary(user_films):
@@ -76,6 +85,18 @@ def sort_directors_by_biased_rating(director_dict):
 
     return {k: v for k, v in sorted(director_dict.items(), key=lambda item: item[1].biased_rating,
                                     reverse=True)}
+
+def get_top_directors_from_tmp(sorted_directors, number=10):
+    count = 0
+    top_directors_list = []
+    for key in list(sorted_directors):
+        tmp = [sorted_directors[key].name, round(sorted_directors[key].biased_rating, 2)]
+        top_directors_list.append(tmp)
+        count += 1
+        if count == number:
+            break
+
+    return top_directors_list
 
 
 

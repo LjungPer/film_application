@@ -98,3 +98,22 @@ def get_directors_of_films():
     db_films = Film.query.all()
     db_director_of_db_film = {film.letterboxd_id: film.director for film in db_films}
     return db_director_of_db_film
+
+
+def user_is_not_in_db(username):
+    return User.query.get(username) is None
+
+
+def add_user_to_db(username, logged_films, num_pages, avatar_url):
+    user = User(username=username, logged_films=logged_films, num_pages=num_pages, avatar_url=avatar_url)
+    db.session.add(user)
+    db.session.commit()
+    print('User {} added to database'.format(username))
+
+
+def update_db_user(username, logged_films, num_pages, avatar_url):
+    user = User.query.get(username)
+    user.logged_films = logged_films
+    user.num_pages = num_pages
+    user.avatar_url = avatar_url
+    db.session.commit()

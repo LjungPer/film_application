@@ -77,14 +77,6 @@
   </div>
 </body>
 <script>
-    {% if text == 'user_data' %}
-        window.location.replace('/user_data');
-    {% elif text == 'update_db' %}
-        window.location.replace('/processing/update_db');
-    {% elif text == 'generate_dir' %}
-        window.location.replace('/processing/generate_dir');
-    {% else %}
-        window.location.replace('/stats');
-    {% endif %}
+    window.location.replace('/update_data');
 </script>
 </html>

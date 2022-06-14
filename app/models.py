@@ -39,3 +39,13 @@ class Miscellaneous(db.Model):
 
     def __repr__(self):
         return '<Film {}>'.format(self.title)
+
+
+class User(db.Model):
+    username = db.Column(db.String(128), primary_key=True)
+    logged_films = db.Column(db.PickleType)
+    num_pages = db.Column(db.Integer)
+    avatar_url = db.Column(db.String(128))
+
+    def __repr__(self):
+        return '<User {}>'.format(self.username)
