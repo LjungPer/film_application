@@ -3,6 +3,7 @@ import requests
 import asyncio
 from aiohttp import ClientSession
 from app.decorators import timed
+from app.models import User
 
 
 async def scrape_letterboxd_urls_of_films(films):
@@ -22,8 +23,8 @@ async def fetch(url, session):
 
 
 @timed
-async def scrape_pages_of_user_films_by_date(username):
-    num_pages = get_page_count(username)
+async def scrape_pages_of_user_films_by_date(username, num_pages):
+
     url = "https://letterboxd.com/{}/films/by/date/page/{}"
     async with ClientSession() as session:
         tasks = []

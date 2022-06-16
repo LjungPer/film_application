@@ -4,54 +4,6 @@ from app.decorators import timed
 from app.database import get_directors_of_films
 from app.models import User
 
-class LocUser:
-    def __init__(self, username):
-        self._username = username
-
-    @property
-    def username(self):
-        return self._username
-
-    def get_top_directors(self, number=10):
-        count = 0
-        top_directors_list = []
-        for key in list(self.sorted_directors):
-            tmp = [self.sorted_directors[key].name, round(self.sorted_directors[key].biased_rating, 2)]
-            top_directors_list.append(tmp)
-            count += 1
-            if count == number:
-                break
-
-        return top_directors_list
-
-    @property
-    def sorted_directors(self):
-        if not hasattr(self, '_sorted_directors'):
-            self._sorted_directors = sort_directors_by_biased_rating(self.directors)
-        return self._sorted_directors
-
-    @property
-    def directors(self):
-        if not hasattr(self, '_directors'):
-            self._directors = create_director_dictionary(self.logged_films)
-        return self._directors
-
-    @property
-    def logged_films(self):
-        if not hasattr(self, '_logged_films'):
-            async def inner():
-                return await get_user_films(self.username)
-            asyncio.set_event_loop(asyncio.SelectorEventLoop())
-            loop = asyncio.get_event_loop()
-            future = asyncio.ensure_future(inner())
-            self._logged_films = loop.run_until_complete(future)
-        return self._logged_films
-
-    @logged_films.setter
-    def logged_films(self, user_films):
-        self._logged_films = user_films
-
-
 def get_top_directors(username):
     user = User.query.get(username)
     logged_films = user.logged_films

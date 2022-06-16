@@ -1,13 +1,14 @@
 import re
 from bs4 import BeautifulSoup, SoupStrainer
-from app.database import extract_films_not_in_db, add_films_to_db, user_is_not_in_db, add_user_to_db, update_db_user
+from app.database import extract_films_not_in_db, add_films_to_db, user_in_db, add_user_to_db, update_db_user
 from app.scraping import scrape_letterboxd_urls_of_films, scrape_pages_of_user_films_by_date, get_page_count, get_user_avatar_src
+from app.models import User
 import asyncio
 
 
 def set_up_user(username):
 
-    if user_is_not_in_db(username):
+    if not user_in_db(username):
         num_pages = get_page_count(username)
         avatar_url = get_user_avatar_src(username)
         logged_films = get_user_films(username)
@@ -24,7 +25,12 @@ def update_user(username):
 def get_user_films(username):
 
     async def inner():
-        pages_of_user_films_by_date = await scrape_pages_of_user_films_by_date(username)
+        if user_in_db(username):
+            u = User.query.get(username)
+            num_pages = u.num_pages
+        else:
+            num_pages = get_page_count(username)
+        pages_of_user_films_by_date = await scrape_pages_of_user_films_by_date(username, num_pages)
         user_films = get_user_films_from_scraped_pages(pages_of_user_films_by_date)
         return user_films
 
@@ -35,14 +41,6 @@ def get_user_films(username):
 
     return user_films
 
-'''
-async def get_user_films(username):
-
-    pages_of_user_films_by_date = await scrape_pages_of_user_films_by_date(username)
-    user_films = get_user_films_from_scraped_pages(pages_of_user_films_by_date)
-
-    return user_films
-'''
 
 def get_user_films_from_scraped_pages(scraped_pages):
     user_films = []
@@ -98,11 +96,19 @@ def get_letterboxd_url(entry):
     return url
 
 
-async def update_db_with_new_films(user_films):
-    films_not_in_db = extract_films_not_in_db(user_films)
-    scrape_responses = await scrape_letterboxd_urls_of_films(films_not_in_db)
-    add_scraped_info_to(films_not_in_db, scrape_responses)
+def update_db_with_new_films(user_films):
 
+    async def inner():
+        scrape_responses = await scrape_letterboxd_urls_of_films(films_not_in_db)
+        return scrape_responses
+
+    films_not_in_db = extract_films_not_in_db(user_films)
+    asyncio.set_event_loop(asyncio.SelectorEventLoop())
+    loop = asyncio.get_event_loop()
+    future = asyncio.ensure_future(inner())
+    scrape_responses = loop.run_until_complete(future)
+
+    add_scraped_info_to(films_not_in_db, scrape_responses)
     add_films_to_db(films_not_in_db)
 
 

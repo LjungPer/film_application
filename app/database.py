@@ -61,7 +61,6 @@ def add_movie_and_director_to_db(film):
             db_director.films.append(db_film)
             db.session.add(db_director)
     db.session.commit()
-    ''' Check if db should be closed somehow to prevent issue with db not accepting more session or something'''
 
 
 def missing_from_tmdb(film):
@@ -100,8 +99,8 @@ def get_directors_of_films():
     return db_director_of_db_film
 
 
-def user_is_not_in_db(username):
-    return User.query.get(username) is None
+def user_in_db(username):
+    return User.query.get(username) is not None
 
 
 def add_user_to_db(username, logged_films, num_pages, avatar_url):

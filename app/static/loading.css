@@ -14,8 +14,12 @@ html {
 }
 
 body {
-    background-color: #1FB6DB;
-}
+              background: rgba(255,255,240,0.8);
+                font: 100 14px sans-serif;
+                color: #000;
+              text-shadow: 0 1px 1px rgba(255,255,255,0.1);
+                text-align: center;
+            }
 
 .msg {
   margin-left:auto;
@@ -35,7 +39,7 @@ body {
 
 /* loading icon color */
 #bonfire-pageloader svg {
-    fill:#fff;
+    fill:#323232;
 }
 
 #bonfire-pageloader svg {

@@ -57,5 +57,7 @@ def update_data():
 
     username = session['username']
     update_user(username)
+    user = User.query.get(username)
+    update_db_with_new_films(user.logged_films)
 
     return redirect(url_for('stats'))
