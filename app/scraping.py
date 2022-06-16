@@ -3,7 +3,6 @@ import requests
 import asyncio
 from aiohttp import ClientSession
 from app.decorators import timed
-from app.models import User
 
 
 async def scrape_letterboxd_urls_of_films(films):

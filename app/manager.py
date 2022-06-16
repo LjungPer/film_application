@@ -4,6 +4,7 @@ from app.database import extract_films_not_in_db, add_films_to_db, user_in_db, a
 from app.scraping import scrape_letterboxd_urls_of_films, scrape_pages_of_user_films_by_date, get_page_count, get_user_avatar_src
 from app.models import User
 import asyncio
+from app.decorators import timed
 
 
 def set_up_user(username):
@@ -21,7 +22,7 @@ def update_user(username):
     logged_films = get_user_films(username)
     update_db_user(username, logged_films, num_pages, avatar_url)
 
-
+@timed
 def get_user_films(username):
 
     async def inner():

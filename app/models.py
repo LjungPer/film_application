@@ -1,5 +1,10 @@
 from app import db
 
+'''
+For when reset:
+1. Change name in repr for TV and Misc
+'''
+
 director_film_table = db.Table('director_film',
                                db.Column('letterboxd_id', db.Integer, db.ForeignKey('film.letterboxd_id')),
                                db.Column('director_id', db.Integer, db.ForeignKey('director.director_id')))
