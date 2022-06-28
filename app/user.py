@@ -1,58 +1,60 @@
 import asyncio
 from app.manager import get_user_films
 from app.decorators import timed
-from app.database import get_directors_of_films
-from app.models import User
-
-def get_top_directors(username):
-    user = User.query.get(username)
-    logged_films = user.logged_films
-    user_directors = create_director_dictionary(logged_films)
-    sorted_directors = sort_directors_by_biased_rating(user_directors)
-    return get_top_directors_from_tmp(sorted_directors)
+from app.database import get_directors_of_films, query_user_films, update_db_user_directors
+from app.models import User, Director
+from app import db
 
 
-''' Help with this function... Variable names, structure etc. '''
-@timed
-def create_director_dictionary(user_films):
+
+def collect_directors(username):
     db_director_of_db_film = get_directors_of_films()
+    user_films = query_user_films(username)
     user_directors = {}
     for film in user_films:
-        if int(film['letterboxd_id']) in db_director_of_db_film:
-            directors = db_director_of_db_film[int(film['letterboxd_id'])]
+        index_of_film = int(film[0])
+        if index_of_film in db_director_of_db_film:
+            directors = db_director_of_db_film[index_of_film]
             for director in directors:
                 if director.director_id in user_directors:
                     user_directors[director.director_id].add_film(film)
                 else:
-                    user_directors[director.director_id] = Director(name=director.name)
+                    user_directors[director.director_id] = Directortmp(name=director.name)
                     user_directors[director.director_id].add_film(film)
 
     return user_directors
 
 
-def sort_directors_by_biased_rating(director_dict):
+def compute_scores(directors):
 
-    for key in director_dict:
-        director_dict[key].compute_biased_rating()
+    directors_with_scores = []
+    for key in directors:
+        directors[key].compute_average_rating()
+        directors[key].compute_biased_rating()
+        tup = (key, directors[key].name, directors[key].get_average_rating(), directors[key].get_biased_rating())
+        directors_with_scores.append(tup)
 
-    return {k: v for k, v in sorted(director_dict.items(), key=lambda item: item[1].biased_rating,
-                                    reverse=True)}
-
-def get_top_directors_from_tmp(sorted_directors, number=10):
-    count = 0
-    top_directors_list = []
-    for key in list(sorted_directors):
-        tmp = [sorted_directors[key].name, round(sorted_directors[key].biased_rating, 2)]
-        top_directors_list.append(tmp)
-        count += 1
-        if count == number:
-            break
-
-    return top_directors_list
+    return directors_with_scores
 
 
+def get_directors_sorted_by_biased(username):
+    user = User.query.get(username)
+    if user.directors is None:
+        user_directors = collect_directors(username)
+        directors_with_scores = compute_scores(user_directors)
+        update_db_user_directors(username, directors_with_scores)
 
-class Director:
+    sorted_directors = sorted(user.directors, key=lambda x: x[3], reverse=True)
+    return sorted_directors
+
+
+def get_top_directors_biased(username, number_of_directors=10):
+    sorted_directors = get_directors_sorted_by_biased(username)
+    return [[el[1], round(el[3], 2)] for (i, el) in zip(range(number_of_directors), sorted_directors)]
+
+    
+
+class Directortmp:
     def __init__(self, name):
         self.name = name
         self.films = []
@@ -79,8 +81,9 @@ class Director:
         tot_rating = 0
         no_rated_films = 0
         for film in self.films:
-            if film['rating'] is not None:
-                tot_rating += int(film['rating'])
+            rating = film[1]
+            if rating is not None:
+                tot_rating += rating
                 no_rated_films += 1
         if no_rated_films > 0:
             self.average_rating = tot_rating / no_rated_films

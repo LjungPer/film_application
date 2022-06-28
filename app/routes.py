@@ -4,7 +4,7 @@ from app.forms import LoginForm, UpdateDataForm
 from app.manager import update_db_with_new_films, set_up_user, update_user
 from app.director import *
 import asyncio
-from app.user import get_top_directors
+from app.user import get_top_directors_biased
 
 
 @app.route('/')
@@ -42,7 +42,7 @@ def stats():
 def directors():
 
     username = session['username']
-    top_directors = get_top_directors(username)
+    top_directors = get_top_directors_biased(username)
 
     return jsonify(top_directors)
 
@@ -56,8 +56,8 @@ def loading():
 def update_data():
 
     username = session['username']
-    update_user(username)
-    user = User.query.get(username)
-    update_db_with_new_films(user.logged_films)
+    logged_films = update_user(username, return_logged_films=True)
+    # user = User.query.get(username)
+    update_db_with_new_films(username, user_films=logged_films)
 
     return redirect(url_for('stats'))

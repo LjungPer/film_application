@@ -10,17 +10,27 @@ from app.decorators import timed
 def set_up_user(username):
 
     if not user_in_db(username):
-        num_pages = get_page_count(username)
-        avatar_url = get_user_avatar_src(username)
-        logged_films = get_user_films(username)
-        add_user_to_db(username, logged_films, num_pages, avatar_url)
+        num_pages, avatar_url, logged_films = get_user_info(username)
+        logged_films_compact = convert_logged_films_to_tuples(logged_films)
+        add_user_to_db(username, logged_films_compact, num_pages, avatar_url)
 
-def update_user(username):
+def update_user(username, return_logged_films=False):
+
+    num_pages, avatar_url, logged_films = get_user_info(username)
+    logged_films_compact = convert_logged_films_to_tuples(logged_films)
+    update_db_user(username, logged_films_compact, num_pages, avatar_url)
+    if return_logged_films:
+        return logged_films
+
+
+def get_user_info(username):
 
     num_pages = get_page_count(username)
     avatar_url = get_user_avatar_src(username)
-    logged_films = get_user_films(username)
-    update_db_user(username, logged_films, num_pages, avatar_url)
+    logged_films = get_user_films(username) 
+
+    return num_pages, avatar_url, logged_films
+
 
 @timed
 def get_user_films(username):
@@ -97,7 +107,19 @@ def get_letterboxd_url(entry):
     return url
 
 
-def update_db_with_new_films(user_films):
+def convert_logged_films_to_tuples(logged_films):
+
+    films_compact = []
+    for i in range(len(logged_films)):
+        tup = (logged_films[i]['letterboxd_id'], logged_films[i]['rating'])
+        films_compact.append(tup)
+    return films_compact
+
+
+def update_db_with_new_films(username, user_films=None):
+
+    if user_films is None:
+        user_films = get_user_films(username)
 
     async def inner():
         scrape_responses = await scrape_letterboxd_urls_of_films(films_not_in_db)

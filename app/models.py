@@ -51,6 +51,7 @@ class User(db.Model):
     logged_films = db.Column(db.PickleType)
     num_pages = db.Column(db.Integer)
     avatar_url = db.Column(db.String(128))
+    directors = db.Column(db.PickleType)
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
