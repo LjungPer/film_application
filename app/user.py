@@ -2,7 +2,7 @@ import asyncio
 from app.manager import get_user_films
 from app.decorators import timed
 from app.database import get_directors_of_films, query_user_films, update_db_user_directors
-from app.models import User, Director
+from app.models import User
 from app import db
 
 
@@ -19,7 +19,7 @@ def collect_directors(username):
                 if director.director_id in user_directors:
                     user_directors[director.director_id].add_film(film)
                 else:
-                    user_directors[director.director_id] = Directortmp(name=director.name)
+                    user_directors[director.director_id] = Director(name=director.name)
                     user_directors[director.director_id].add_film(film)
 
     return user_directors
@@ -40,9 +40,7 @@ def compute_scores(directors):
 def get_directors_sorted_by_biased(username):
     user = User.query.get(username)
     if user.directors is None:
-        user_directors = collect_directors(username)
-        directors_with_scores = compute_scores(user_directors)
-        update_db_user_directors(username, directors_with_scores)
+        update_user_director_statistics(username)
 
     sorted_directors = sorted(user.directors, key=lambda x: x[3], reverse=True)
     return sorted_directors
@@ -53,8 +51,20 @@ def get_top_directors_biased(username, number_of_directors=10):
     return [[el[1], round(el[3], 2)] for (i, el) in zip(range(number_of_directors), sorted_directors)]
 
     
+def update_user_statistics(username):
+    
+    ''' Currently only does director, but can add additional statistics here.'''
+    update_user_director_statistics(username)
 
-class Directortmp:
+
+def update_user_director_statistics(username):
+
+    user_directors = collect_directors(username)
+    directors_with_scores = compute_scores(user_directors)
+    update_db_user_directors(username, directors_with_scores)
+
+
+class Director:
     def __init__(self, name):
         self.name = name
         self.films = []

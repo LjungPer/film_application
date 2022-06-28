@@ -14,7 +14,7 @@ def set_up_user(username):
         logged_films_compact = convert_logged_films_to_tuples(logged_films)
         add_user_to_db(username, logged_films_compact, num_pages, avatar_url)
 
-def update_user(username, return_logged_films=False):
+def update_user_info(username, return_logged_films=False):
 
     num_pages, avatar_url, logged_films = get_user_info(username)
     logged_films_compact = convert_logged_films_to_tuples(logged_films)
@@ -116,10 +116,7 @@ def convert_logged_films_to_tuples(logged_films):
     return films_compact
 
 
-def update_db_with_new_films(username, user_films=None):
-
-    if user_films is None:
-        user_films = get_user_films(username)
+def update_db_with_new_films(user_films):
 
     async def inner():
         scrape_responses = await scrape_letterboxd_urls_of_films(films_not_in_db)

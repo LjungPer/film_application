@@ -1,10 +1,10 @@
 from flask import render_template, flash, redirect, session, url_for, jsonify
 from app import app
 from app.forms import LoginForm, UpdateDataForm
-from app.manager import update_db_with_new_films, set_up_user, update_user
+from app.manager import update_db_with_new_films, set_up_user, update_user_info
 from app.director import *
 import asyncio
-from app.user import get_top_directors_biased
+from app.user import get_top_directors_biased, update_user_statistics
 
 
 @app.route('/')
@@ -56,8 +56,8 @@ def loading():
 def update_data():
 
     username = session['username']
-    logged_films = update_user(username, return_logged_films=True)
-    # user = User.query.get(username)
-    update_db_with_new_films(username, user_films=logged_films)
+    user_films = update_user_info(username, return_logged_films=True)
+    update_db_with_new_films(user_films)
+    update_user_statistics(username)
 
     return redirect(url_for('stats'))
