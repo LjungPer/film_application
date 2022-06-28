@@ -3,7 +3,6 @@ from app import app
 from app.forms import LoginForm, UpdateDataForm
 from app.manager import update_db_with_new_films, set_up_user, update_user_info
 from app.director import *
-import asyncio
 from app.user import get_top_directors_biased, update_user_statistics
 
 

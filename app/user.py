@@ -1,5 +1,3 @@
-import asyncio
-from app.manager import get_user_films
 from app.decorators import timed
 from app.database import get_directors_of_films, query_user_films, update_db_user_directors
 from app.models import User

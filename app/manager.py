@@ -14,6 +14,7 @@ def set_up_user(username):
         logged_films_compact = convert_logged_films_to_tuples(logged_films)
         add_user_to_db(username, logged_films_compact, num_pages, avatar_url)
 
+
 def update_user_info(username, return_logged_films=False):
 
     num_pages, avatar_url, logged_films = get_user_info(username)
@@ -27,7 +28,7 @@ def get_user_info(username):
 
     num_pages = get_page_count(username)
     avatar_url = get_user_avatar_src(username)
-    logged_films = get_user_films(username) 
+    logged_films = get_user_films(username)
 
     return num_pages, avatar_url, logged_films
 
@@ -42,7 +43,8 @@ def get_user_films(username):
         else:
             num_pages = get_page_count(username)
         pages_of_user_films_by_date = await scrape_pages_of_user_films_by_date(username, num_pages)
-        user_films = get_user_films_from_scraped_pages(pages_of_user_films_by_date)
+        user_films = get_user_films_from_scraped_pages(
+            pages_of_user_films_by_date)
         return user_films
 
     asyncio.set_event_loop(asyncio.SelectorEventLoop())
@@ -133,11 +135,13 @@ def update_db_with_new_films(user_films):
 
 
 def add_scraped_info_to(films, scrape_responses):
-    relevant = SoupStrainer('a', attrs={"class": "micro-button track-event", "data-track-action": "TMDb"})
+    relevant = SoupStrainer(
+        'a', attrs={"class": "micro-button track-event", "data-track-action": "TMDb"})
     index = 0
     for response in scrape_responses:
         soup = BeautifulSoup(response, "lxml", parse_only=relevant)
-        tmp = soup.find('a', attrs={"class": "micro-button track-event", "data-track-action": "TMDb"})['href']
+        tmp = soup.find('a', attrs={
+                        "class": "micro-button track-event", "data-track-action": "TMDb"})['href']
 
         if re.search('movie/(.*)/', tmp) is not None:
             tmdb_id = re.search('movie/(.*)/', tmp).group(1)
