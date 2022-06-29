@@ -15,23 +15,33 @@
     </form>
     </div>
     <p id="loading_text"></p>
-    <div id="directors"></div>
+    <div id="directors" style="text-align:center"></div>
 
     <script>
 
         // function to create table html from json
         var createDirectorsTableFromJson = function(data) {
             var table = document.createElement("table");
+            
 
+            const titles = ["Director", "Biased", "Average"];
+            var tr = table.insertRow();
+            for (var k = 0; k < titles.length; k++) {
+                var cell = tr.insertCell();
+                cell.innerHTML = titles[k];
+                cell.style.fontWeight = 'bold';
+            }
+            
             for (var i = 0; i < data.length; i++) {
                 var tr = table.insertRow();
 
-                for (var j = 0; j < 2; j++) {
+                for (var j = 0; j < 3; j++) {
                     var cell = tr.insertCell();
-                    cell.innerHTML = data[i][j]; // 0: name, 1: rating
+                    cell.innerHTML = data[i][j]; // 0: name, 1: biased rating, 2: average rating
                 }
             }
 
+            table.className = "aClassName";
             return table;
         }
 
