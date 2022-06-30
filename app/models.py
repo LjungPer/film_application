@@ -7,12 +7,12 @@ For when reset:
 
 director_film_table = db.Table('director_film',
                                db.Column('letterboxd_id', db.Integer, db.ForeignKey('film.letterboxd_id')),
-                               db.Column('director_id', db.Integer, db.ForeignKey('director.director_id')))
+                               db.Column('id', db.Integer, db.ForeignKey('director.id')))
 
 
 class Director(db.Model):
     ''' rename director_id to e.g. letterboxd_id or just id '''
-    director_id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64))
 
     def __repr__(self):
@@ -35,7 +35,7 @@ class Tv(db.Model):
     title = db.Column(db.String(128))
 
     def __repr__(self):
-        return '<Film {}>'.format(self.title)
+        return '<TV {}>'.format(self.title)
 
 
 class Miscellaneous(db.Model):
@@ -43,7 +43,7 @@ class Miscellaneous(db.Model):
     title = db.Column(db.String(128))
 
     def __repr__(self):
-        return '<Film {}>'.format(self.title)
+        return '<Misc {}>'.format(self.title)
 
 
 class User(db.Model):

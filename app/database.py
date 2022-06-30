@@ -62,7 +62,7 @@ def add_movie_and_director_to_db(film):
             Director.query.get(int(director['id'])).films.append(db_film)
         else:
             db_director = Director(
-                director_id=director['id'], name=director['name'])
+                id=director['id'], name=director['name'])
             db_director.films.append(db_film)
             db.session.add(db_director)
     db.session.commit()
@@ -87,7 +87,7 @@ def add_misc_to_db(film):
 
 def director_is_in_db(director):
     ''' Try do write this shorter, e.g. Director.query.get(int(director['id'])) is not None '''
-    return db.session.query(Director.director_id).filter_by(director_id=int(director['id'])).first() is not None
+    return Director.query.get(int(director['id'])) is not None
 
 
 def add_tv_to_db(film):

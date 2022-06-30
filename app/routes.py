@@ -2,8 +2,8 @@ from flask import render_template, flash, redirect, session, url_for, jsonify
 from app import app
 from app.forms import LoginForm, UpdateDataForm
 from app.manager import update_db_with_new_films, set_up_user, update_user_info
-from app.director import *
 from app.user import get_top_directors_biased, update_user_statistics
+from app.models import User
 
 
 @app.route('/')
@@ -34,7 +34,7 @@ def stats():
         print("test")
         return redirect(url_for('loading'))
 
-    return render_template('tmp_stats.html', num_pages=num_pages, username=username, avatar_url=avatar_url, form=form)
+    return render_template('stats.html', num_pages=num_pages, username=username, avatar_url=avatar_url, form=form)
 
 
 @app.route('/directors', methods=["GET"])
