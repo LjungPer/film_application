@@ -112,8 +112,8 @@ def get_letterboxd_url(entry):
 def convert_logged_films_to_tuples(logged_films):
 
     films_compact = []
-    for i in range(len(logged_films)):
-        tup = (logged_films[i]['letterboxd_id'], logged_films[i]['rating'])
+    for film in logged_films:
+        tup = (int(film['letterboxd_id']), film['rating'])
         films_compact.append(tup)
     return films_compact
 

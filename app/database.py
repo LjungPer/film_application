@@ -86,7 +86,6 @@ def add_misc_to_db(film):
 
 
 def director_is_in_db(director):
-    ''' Try do write this shorter, e.g. Director.query.get(int(director['id'])) is not None '''
     return Director.query.get(int(director['id'])) is not None
 
 

@@ -33,7 +33,18 @@ class Director:
     def number_of_films(self) -> int:
         return len(self.films)
 
-    def add_film(self, film):
+    def append_film(self, film: Tuple[int, int]) -> None:
+        """
+        Append a film to list of related films.
+
+        Argument film characterized by tuple of attributes.
+        film[0]: id(int), film[1]: rating(int).
+
+        Parameters
+        ----------
+        film : Tuple[int, int]
+            Film to append.
+        """
         self.films.append(film)
 
     def compute_average_rating(self) -> float:
@@ -48,7 +59,6 @@ class Director:
             return tot_rating / nr_rated_films
         else:
             return 0
-        
 
     def compute_biased_rating(self) -> float:
         nr_films = len(self.films)
@@ -62,7 +72,7 @@ def get_top_directors_biased(username: str, nr_items: int = 10) -> List[list]:
     Return list of top directors based on biased rating.
 
     Each director in list is represented by a list of attributes.
-    Attributes consist of name(str), avg_rating(float) and bias_rating(float).
+    Attributes consist of name(str), avg_rating(float),  bias_rating(float) and nr_films(int).
 
     Parameters
     ----------
@@ -82,7 +92,8 @@ def get_top_directors_biased(username: str, nr_items: int = 10) -> List[list]:
         name = director[1]
         avg_rating = round(director[2], 2)
         bias_rating = round(director[3], 2)
-        top_directors.append([name, avg_rating, bias_rating])
+        nr_films = director[4]
+        top_directors.append([name, avg_rating, bias_rating, nr_films])
 
     return top_directors
 
@@ -113,16 +124,16 @@ def collect_directors(username: str) -> dict:
     user_films = query_user_films(username)
     user_directors = {}
     for film in user_films:
-        index_of_film = int(film[0])
+        index_of_film = film[0]
         if index_of_film in db_director_of_db_film:
             db_directors = db_director_of_db_film[index_of_film]
             for db_director in db_directors:
                 if db_director.id in user_directors:
-                    user_directors[db_director.id].add_film(film)
+                    user_directors[db_director.id].append_film(film)
                 else:
                     user_directors[db_director.id] = Director(
                         name=db_director.name)
-                    user_directors[db_director.id].add_film(film)
+                    user_directors[db_director.id].append_film(film)
 
     return user_directors
 
@@ -144,7 +155,6 @@ def get_director_attributes(key: int, director: Director) -> Tuple[int, str, flo
     name = director.name
     avg_rating = director.average_rating
     bias_rating = director.biased_rating
-    no_films = director.number_of_films
+    nr_films = director.number_of_films
 
-    return key, name, avg_rating, bias_rating, no_films
-
+    return key, name, avg_rating, bias_rating, nr_films
