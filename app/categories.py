@@ -1,7 +1,6 @@
 from typing import Tuple
 
 
-
 class Category:
     def __init__(self, name: str) -> None:
             self._name = name
@@ -62,6 +61,7 @@ class Category:
         biased_factor = 1 - 0.8 / nr_films
 
         return self.average_rating * biased_factor
+
 
 
 class Director(Category):

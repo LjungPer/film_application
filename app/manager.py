@@ -130,26 +130,24 @@ def update_db_with_new_films(user_films):
     future = asyncio.ensure_future(inner())
     scrape_responses = loop.run_until_complete(future)
 
-    add_scraped_info_to(films_not_in_db, scrape_responses)
+    add_scraped_info(films_not_in_db, scrape_responses)
     add_films_to_db(films_not_in_db)
 
 
-def add_scraped_info_to(films, scrape_responses):
+def add_scraped_info(films, scrape_responses):
     relevant = SoupStrainer(
         'a', attrs={"class": "micro-button track-event", "data-track-action": "TMDb"})
-    index = 0
-    for response in scrape_responses:
+    for film, response in zip(films, scrape_responses):
         soup = BeautifulSoup(response, "lxml", parse_only=relevant)
         tmp = soup.find('a', attrs={
-                        "class": "micro-button track-event", "data-track-action": "TMDb"})['href']
+                        "class": "micro-button track-event", "data-track-action": "TMDb"})['href']  # type: ignore
 
-        if re.search('movie/(.*)/', tmp) is not None:
-            tmdb_id = re.search('movie/(.*)/', tmp).group(1)
-            films[index]['tmdb_id'] = tmdb_id
-            films[index]['movie'] = True
+        if re.search('movie/(.*)/', tmp) is not None:  # type: ignore
+            tmdb_id = re.search('movie/(.*)/', tmp).group(1)  # type: ignore
+            film['tmdb_id'] = tmdb_id
+            film['movie'] = True
 
-        if re.search('tv/(.*)/', tmp) is not None:
-            tmdb_id = re.search('tv/(.*)/', tmp).group(1)
-            films[index]['tmdb_id'] = tmdb_id
-            films[index]['tv'] = True
-        index += 1
+        if re.search('tv/(.*)/', tmp) is not None:  # type: ignore
+            tmdb_id = re.search('tv/(.*)/', tmp).group(1)  # type: ignore
+            film['tmdb_id'] = tmdb_id
+            film['tv'] = True

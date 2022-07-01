@@ -42,7 +42,7 @@ def get_page_count(username):
     soup = BeautifulSoup(r.text, "lxml")
 
     body = soup.find("body")
-    if "error" in body["class"]:
+    if "error" in body['class']:  # type: ignore
         return -1
 
     try:
