@@ -10,6 +10,16 @@ director_film_table = db.Table('director_film',
                                db.Column('id', db.Integer, db.ForeignKey('director.id')))
 
 
+country_film_table = db.Table('country_film',
+                               db.Column('letterboxd_id', db.Integer, db.ForeignKey('film.letterboxd_id')),
+                               db.Column('name', db.Integer, db.ForeignKey('country.name')))
+
+class Country(db.Model):
+    name = db.Column(db.String(64), primary_key=True)
+
+    def __repr__(self):
+        return '<Country {}>'.format(self.name)
+
 class Director(db.Model):
     ''' rename director_id to e.g. letterboxd_id or just id '''
     id = db.Column(db.Integer, primary_key=True)
@@ -24,6 +34,7 @@ class Film(db.Model):
     tmdb_id = db.Column(db.Integer, index=True, unique=True)
     title = db.Column(db.String(128))
     director = db.relationship('Director', secondary=director_film_table, backref=db.backref('films', lazy='dynamic'))
+    country = db.relationship('Country', secondary=country_film_table, backref=db.backref('films', lazy='dynamic'))
 
     def __repr__(self):
         return '<Film {}>'.format(self.title)

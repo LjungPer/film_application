@@ -46,18 +46,16 @@ def add_movie_and_director_to_db(film):
             title=film['film_title']))
         return
 
-    ''' This parts add the film to the database. '''
+    ''' This part adds the film to the database. '''
     tmdb_film = tmdb.Movies(film['tmdb_id'])
-    tmdb_film.info()
-    db_film = Film(tmdb_id=int(film['tmdb_id']), title=tmdb_film.title,
+    tmdb_film_info = tmdb_film.info()
+    db_film = Film(tmdb_id=int(film['tmdb_id']), title=tmdb_film_info['title'],
                    letterboxd_id=int(film['letterboxd_id']))
     db.session.add(db_film)
 
-    ''' This parts add the director to the database. '''
-    ''' Make this as a function named find_directors_of_movie(tmdb_film). '''
-    directors = [credit for credit in tmdb_film.credits()['crew']
-                 if credit["job"] == "Director"]
-    for director in directors:
+    ''' This part adds the director to the database. '''
+    directors_of_film = find_directors_of_movie(tmdb_film)
+    for director in directors_of_film:
         if director_is_in_db(director):
             Director.query.get(int(director['id'])).films.append(db_film)
         else:
@@ -65,7 +63,22 @@ def add_movie_and_director_to_db(film):
                 id=director['id'], name=director['name'])
             db_director.films.append(db_film)
             db.session.add(db_director)
+
+    ''' This part adds country to the database '''
+    production_countries = tmdb_film_info['production_countries']
+    for country in production_countries:
+        if country_is_in_db(country):
+            Country.query.get(country['name']).films.append(db_film)
+        else:
+            db_country = Country(name=country['name'])
+            db_country.films.append(db_film)
+            db.session.add(db_country)
     db.session.commit()
+
+def find_directors_of_movie(tmdb_film):
+    directors = [credit for credit in tmdb_film.credits()['crew']
+                 if credit["job"] == "Director"]
+    return directors
 
 
 def missing_from_tmdb(film):
@@ -88,19 +101,33 @@ def add_misc_to_db(film):
 def director_is_in_db(director):
     return Director.query.get(int(director['id'])) is not None
 
+def country_is_in_db(country):
+    return Country.query.get(country['name']) is not None
+
 
 def add_tv_to_db(film):
     print(film['film_title'], film['tmdb_id'])
     tmdb_film = tmdb.TV(film['tmdb_id'])
-    tmdb_film.info()
-    db_tv = Tv(tmdb_id=int(film['tmdb_id']), title=tmdb_film.name, letterboxd_id=int(
+    tmbd_film_info = tmdb_film.info()
+    db_tv = Tv(tmdb_id=int(film['tmdb_id']), title=tmbd_film_info['name'], letterboxd_id=int(
         film['letterboxd_id']))
     db.session.add(db_tv)
     db.session.commit()
 
 
 @timed
-def get_directors_of_films():
+def query_directors_of_all_db_films() -> dict:
+    """
+    Query the director of each film in the database.
+
+    Returned dictionary constructed as:
+    key - letterboxd_id(int), value - director(models.Director).
+
+    Returns
+    -------
+    dict
+        Dictionary of {int: models.Director}.
+    """
     db_films = Film.query.all()
     db_director_of_db_film = {
         film.letterboxd_id: film.director for film in db_films}

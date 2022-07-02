@@ -1,6 +1,6 @@
 from audioop import avg
 from app.decorators import timed
-from app.database import get_directors_of_films, query_user_films, update_db_user_directors
+from app.database import query_directors_of_all_db_films, query_user_films, update_db_user_directors
 from app.models import User
 from typing import Tuple, List
 from app.categories import Director
@@ -59,7 +59,7 @@ def update_user_director_statistics(username: str) -> None:
 
 
 def collect_directors(username: str) -> dict:
-    db_director_of_db_film = get_directors_of_films()
+    db_director_of_db_film = query_directors_of_all_db_films()
     user_films = query_user_films(username)
     user_directors = {}
     for film in user_films:
