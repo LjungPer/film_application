@@ -58,7 +58,7 @@ def update_user_category_statistics(username: str, category_type: str) -> None:
 def collect_category(username: str, category: str) -> dict:
 
     db_category_of_db_film = query_category_of_all_db_films(category)
-    user_films = query_user_films(username)
+    user_films = query_user_attr(username, 'Film')
     user_categories = {}
     for film in user_films:
         index_of_film = film[0]
