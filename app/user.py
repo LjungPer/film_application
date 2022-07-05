@@ -1,5 +1,4 @@
-from app.database import query_user_films, update_db_user_category, query_category_of_all_db_films, get_primary_key
-from app.models import User
+from app.database import query_user_attr, update_db_user_category, query_category_of_all_db_films, get_primary_key
 from typing import Tuple, List, Union
 from app.categories import Director, Country, Category
 
@@ -36,11 +35,12 @@ def get_top_directors_biased(username: str, nr_items: int = 10) -> List[list]:
 
 
 def get_directors_sorted_by_biased(username: str) -> List[Tuple]:
-    user = User.query.get(username)
-    if user.directors is None:
+    user_directors = query_user_attr(username, 'Director')
+    if user_directors is None:
         update_user_category_statistics(username, 'Director')
+        user_directors = query_user_attr(username, 'Director')
 
-    sorted_directors = sorted(user.directors, key=lambda x: x[3], reverse=True)
+    sorted_directors = sorted(user_directors, key=lambda x: x[3], reverse=True)
     return sorted_directors
 
 
