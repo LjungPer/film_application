@@ -1,3 +1,4 @@
+from attr import attr
 import requests
 import tmdbsimple as tmdb
 from app.models import *
@@ -30,7 +31,9 @@ def find_all_ids_in_db():
 
 @timed
 def add_films_to_db(films_not_in_db):
-    for film in films_not_in_db:
+    nr_films = len(films_not_in_db)
+    for i, film in zip(range(nr_films), films_not_in_db):
+        print(film['film_title'], film['tmdb_id'], '{}/{}'.format(i + 1, nr_films))
         if film['movie']:
             add_movie_and_director_to_db(film)
         if film['tv']:
@@ -40,7 +43,6 @@ def add_films_to_db(films_not_in_db):
 def add_movie_and_director_to_db(film):
     ''' Mayhaps this can be better written, but should check how the database objects are related and used. '''
 
-    print(film['film_title'], film['tmdb_id'])
     if missing_from_tmdb(film):
         add_misc_to_db(film)
         print('Added {title} to Miscallaneous'.format(
