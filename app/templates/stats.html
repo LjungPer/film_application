@@ -15,13 +15,13 @@
     </form>
     </div>
     <p id="loading_text"></p>
-    <div id="directors" style="text-align:center"></div>
-    <div id="countries" style="text-align:center"></div>
+    <div id="Director" style="text-align:center"></div>
+    <div id="Country" style="text-align:center"></div>
 
     <script>
 
         // function to create table html from json
-        var createDirectorsTableFromJson = function(data, title) {
+        var createCategoryTableFromJson = function(data, title) {
             var table = document.createElement("table");
             
 
@@ -46,58 +46,15 @@
             return table;
         }
 
-        var createCountriesTableFromJson = function(data) {
-            var table = document.createElement("table");
-            
-
-            const titles = ["Country", "Average", "Biased", "#films"];
-            var tr = table.insertRow();
-            for (var k = 0; k < titles.length; k++) {
-                var cell = tr.insertCell();
-                cell.innerHTML = titles[k];
-                cell.style.fontWeight = 'bold';
-            }
-            
-            for (var i = 0; i < data.length; i++) {
-                var tr = table.insertRow();
-
-                for (var j = 0; j < titles.length; j++) {
-                    var cell = tr.insertCell();
-                    cell.innerHTML = data[i][j]; // 0: name, 1: average rating, 2: biased rating, 3: nr films 
-                }
-            }
-
-            table.className = "aClassName";
-            return table;
-        }
-
-        var fetchDirectors = function() {
+        var fetchCategory = function(title) {
             console.log("fetching directors data");
             $.ajax({
                 type: "GET",
-                url: "/directors"
-            }).done(function(jsonData) {
+                url: "/categories/" + title}).done(function(jsonData) {
                 console.log("success ");
                 $("#loading_text").hide();
-                var table = createDirectorsTableFromJson(jsonData);
-                var div = document.getElementById("directors");
-                div.innerHTML = "";
-                div.appendChild(table);
-            }).fail(function() {
-                console.log("failed")
-            });
-        }
-
-        var fetchCountries = function() {
-            console.log("fetching countries data");
-            $.ajax({
-                type: "GET",
-                url: "/countries"
-            }).done(function(jsonData) {
-                console.log("success ");
-                $("#loading_text").hide();
-                var table = createCountriesTableFromJson(jsonData);
-                var div = document.getElementById("countries");
+                var table = createCategoryTableFromJson(jsonData, title);
+                var div = document.getElementById(title);
                 div.innerHTML = "";
                 div.appendChild(table);
             }).fail(function() {
@@ -108,8 +65,8 @@
         function topDirectorsButton() {
             var p = document.getElementById("loading_text");
             p.textContent = "Loading";
-            fetchDirectors();
-            fetchCountries();
+            fetchCategory('Director');
+            fetchCategory('Country');
         }
 
     </script>

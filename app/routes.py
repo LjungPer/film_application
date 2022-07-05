@@ -1,5 +1,6 @@
 from flask import render_template, flash, redirect, session, url_for, jsonify
 from app import app
+from app import user
 from app.forms import LoginForm, UpdateDataForm
 from app.manager import update_db_with_new_films, set_up_user, update_user_info
 from app.user import get_top_directors_biased, update_user_statistics, get_top_countries_biased
@@ -36,22 +37,17 @@ def stats():
     return render_template('stats.html', num_pages=num_pages, username=username, avatar_url=avatar_url, form=form)
 
 
-@app.route('/directors', methods=["GET"])
-def directors():
+@app.route('/categories/<category_type>', methods=["GET"])
+def categories(category_type):
+    
+
+    print(str(category_type) == 'Director')
 
     username = session['username']
-    top_directors = get_top_directors_biased(username)
-
-    return jsonify(top_directors)
-
-
-@app.route('/countries', methods=["GET"])
-def countries():
-
-    username = session['username']
-    top_countries = get_top_countries_biased(username)
-
-    return jsonify(top_countries)
+    if str(category_type) == 'Director':
+        return jsonify(get_top_directors_biased(username))
+    if str(category_type) == 'Country':
+        return jsonify(get_top_countries_biased(username))
 
 
 @app.route('/loading', methods=['GET'])
