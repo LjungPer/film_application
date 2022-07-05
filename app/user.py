@@ -1,9 +1,7 @@
-from audioop import avg
-from app.decorators import timed
-from app.database import query_directors_of_all_db_films, query_user_films, update_db_user_directors
+from app.database import query_user_films, update_db_user_category, query_category_of_all_db_films, get_primary_key
 from app.models import User
-from typing import Tuple, List
-from app.categories import Director
+from typing import Tuple, List, Union
+from app.categories import Director, Country, Category
 
 
 def get_top_directors_biased(username: str, nr_items: int = 10) -> List[list]:
@@ -40,60 +38,71 @@ def get_top_directors_biased(username: str, nr_items: int = 10) -> List[list]:
 def get_directors_sorted_by_biased(username: str) -> List[Tuple]:
     user = User.query.get(username)
     if user.directors is None:
-        update_user_director_statistics(username)
+        update_user_category_statistics(username, 'Director')
 
     sorted_directors = sorted(user.directors, key=lambda x: x[3], reverse=True)
     return sorted_directors
 
 
 def update_user_statistics(username: str) -> None:
-    ''' Currently only does director, but can add additional statistics here.'''
-    update_user_director_statistics(username)
+    update_user_category_statistics(username, 'Director')
+    update_user_category_statistics(username, 'Country')
 
 
-def update_user_director_statistics(username: str) -> None:
+def update_user_category_statistics(username: str, category_type: str) -> None:
+    user_category = collect_category(username, category_type)
+    category_with_attrs = add_attrs_to_category(user_category)
+    update_db_user_category(username, category_with_attrs, category_type)
 
-    user_directors = collect_directors(username)
-    directors_with_attributes = add_attributres_to_directors(user_directors)
-    update_db_user_directors(username, directors_with_attributes)
 
+def collect_category(username: str, category: str) -> dict:
 
-def collect_directors(username: str) -> dict:
-    db_director_of_db_film = query_directors_of_all_db_films()
+    db_category_of_db_film = query_category_of_all_db_films(category)
     user_films = query_user_films(username)
-    user_directors = {}
+    user_categories = {}
     for film in user_films:
         index_of_film = film[0]
-        if index_of_film in db_director_of_db_film:
-            db_directors = db_director_of_db_film[index_of_film]
-            for db_director in db_directors:
-                if db_director.id in user_directors:
-                    user_directors[db_director.id].append_film(film)
+        if index_of_film in db_category_of_db_film:
+            db_categories = db_category_of_db_film[index_of_film]
+            for db_category in db_categories:
+                primary_key = get_primary_key(db_category)
+                if primary_key in user_categories:
+                    user_categories[primary_key].append_film(film)
                 else:
-                    user_directors[db_director.id] = Director(
-                        name=db_director.name)
-                    user_directors[db_director.id].append_film(film)
+                    user_categories[primary_key] = initialize_category(
+                        category, db_category.name)
+                    user_categories[primary_key].append_film(film)
 
-    return user_directors
-
-
-def add_attributres_to_directors(directors: dict) -> List[Tuple]:
-
-    directors_with_attributes = []
-    for key in directors:
-        director = directors[key]
-
-        attributes = get_director_attributes(key, director)
-        directors_with_attributes.append(attributes)
-
-    return directors_with_attributes
+    return user_categories
 
 
-def get_director_attributes(key: int, director: Director) -> Tuple[int, str, float, float, int]:
+def initialize_category(category, name) -> Category:
 
-    name = director.name
-    avg_rating = director.average_rating
-    bias_rating = director.biased_rating
-    nr_films = director.number_of_films
+    if category == 'Director':
+        return Director(name)
+    elif category == 'Country':
+        return Country(name)
+    else:
+        return Category(name)
+
+
+def add_attrs_to_category(categories: dict) -> List[Tuple]:
+
+    categories_with_attrs = []
+    for key in categories:
+        category = categories[key]
+
+        attrs = get_category_attrs(key, category)
+        categories_with_attrs.append(attrs)
+
+    return categories_with_attrs
+
+
+def get_category_attrs(key: Union[int, str], category: Union[Director, Country]) -> Tuple[Union[int, str], str, float, float, int]:
+
+    name = category.name
+    avg_rating = category.average_rating
+    bias_rating = category.biased_rating
+    nr_films = category.number_of_films
 
     return key, name, avg_rating, bias_rating, nr_films
