@@ -31,7 +31,6 @@ def stats():
         return redirect(url_for('login'))
 
     if form.validate_on_submit():
-        print("test")
         return redirect(url_for('loading'))
 
     return render_template('stats.html', num_pages=num_pages, username=username, avatar_url=avatar_url, form=form)
