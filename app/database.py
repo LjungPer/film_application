@@ -185,9 +185,16 @@ def user_in_db(username):
     return User.query.get(username) is not None
 
 
-def query_user_films(username):
+def query_user_attr(username: str, attr_type: str) -> List[Tuple]:
     user = User.query.get(username)
-    return user.logged_films
+    if attr_type == 'Film':
+        return user.logged_films
+    elif attr_type == 'Director':
+        return user.directors
+    elif attr_type == 'Country':
+        return user.countries
+    else:
+        raise TypeError('No such attribute') 
 
 
 def add_user_to_db(username, logged_films_compact, num_pages, avatar_url):
