@@ -1,78 +1,39 @@
 from app.database import query_user_attr, update_db_user_category, query_category_of_all_db_films, get_primary_key
 from typing import Tuple, List, Union
-from app.categories import Director, Country, Category
+from app.categories import DirectorStats, CountryStats, Category
 
 
-def get_top_directors_biased(username: str, nr_items: int = 10) -> List[list]:
-    """
-    Return list of top directors based on biased rating.
+def get_top_category_biased(username: str, category_type: str, nr_items: int = 10) -> List[list]:
 
-    Each director in list is represented by a list of attributes.
-    Attributes consist of name(str), avg_rating(float),  bias_rating(float) and nr_films(int).
+    sorted_category = get_category_sorted_by_biased(username, category_type)
+    top_category = []
+    for i, category in zip(range(nr_items), sorted_category):
+        name = category[1]
+        avg_rating = round(category[2], 2)
+        bias_rating = round(category[3], 2)
+        nr_films = category[4]
+        top_category.append([name, avg_rating, bias_rating, nr_films])
 
-    Parameters
-    ----------
-    username : str
-
-    no_items : int, optional
-        Number of directors to be returned, by default 10.
-
-    Returns
-    -------
-    List[list]
-        List of top directors based on biased rating.
-    """
-    sorted_directors = get_directors_sorted_by_biased(username)
-    top_directors = []
-    for i, director in zip(range(nr_items), sorted_directors):
-        name = director[1]
-        avg_rating = round(director[2], 2)
-        bias_rating = round(director[3], 2)
-        nr_films = director[4]
-        top_directors.append([name, avg_rating, bias_rating, nr_films])
-
-    return top_directors
+    return top_category
 
 
+def get_category_sorted_by_biased(username: str, category_type: str) -> List[Tuple]:
 
-def get_directors_sorted_by_biased(username: str) -> List[Tuple]:
-    user_directors = query_user_attr(username, 'Director')
-    if user_directors is None:
-        update_user_category_statistics(username, 'Director')
-        user_directors = query_user_attr(username, 'Director')
+    user_category = query_user_attr(username, category_type)
+    if user_category is None:
+        update_user_category(username, category_type)
+        user_category = query_user_attr(username, category_type)
 
-    sorted_directors = sorted(user_directors, key=lambda x: x[3], reverse=True)
-    return sorted_directors
+    sorted_category = sorted(user_category, key=lambda x: x[3], reverse=True)
+    return sorted_category
 
-
-def get_top_countries_biased(username: str, nr_items: int = 10) -> List[list]:
-    sorted_countries = get_countries_sorted_by_biased(username)
-    top_countries = []
-    for i, country in zip(range(nr_items), sorted_countries):
-        name = country[1]
-        avg_rating = round(country[2], 2)
-        bias_rating = round(country[3], 2)
-        nr_films = country[4]
-        top_countries.append([name, avg_rating, bias_rating, nr_films])
-
-    return top_countries
-
-
-def get_countries_sorted_by_biased(username: str) -> List[Tuple]:
-    user_countries = query_user_attr(username, 'Country')
-    if user_countries is None:
-        update_user_category_statistics(username, 'Country')
-        user_countries = query_user_attr(username, 'Country')
-
-    sorted_countries = sorted(user_countries, key=lambda x: x[3], reverse=True)
-    return sorted_countries
 
 def update_user_statistics(username: str) -> None:
-    update_user_category_statistics(username, 'Director')
-    update_user_category_statistics(username, 'Country')
+    update_user_category(username, 'Director')
+    update_user_category(username, 'Country')
 
 
-def update_user_category_statistics(username: str, category_type: str) -> None:
+def update_user_category(username: str, category_type: str) -> None:
     user_category = collect_category(username, category_type)
     category_with_attrs = add_attrs_to_category(user_category)
     update_db_user_category(username, category_with_attrs, category_type)
@@ -99,12 +60,12 @@ def collect_category(username: str, category_type: str) -> dict:
     return user_categories
 
 
-def initialize_category(category, name) -> Category:
+def initialize_category(category_type, name) -> Category:
 
-    if category == 'Director':
-        return Director(name)
-    elif category == 'Country':
-        return Country(name)
+    if category_type == 'Director':
+        return DirectorStats(name)
+    elif category_type == 'Country':
+        return CountryStats(name)
     else:
         return Category(name)
 
@@ -121,7 +82,7 @@ def add_attrs_to_category(categories: dict) -> List[Tuple]:
     return categories_with_attrs
 
 
-def get_category_attrs(key: Union[int, str], category: Union[Director, Country]) -> Tuple[Union[int, str], str, float, float, int]:
+def get_category_attrs(key: Union[int, str], category: Union[DirectorStats, CountryStats]) -> Tuple[Union[int, str], str, float, float, int]:
 
     name = category.name
     avg_rating = category.average_rating

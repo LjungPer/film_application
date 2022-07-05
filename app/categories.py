@@ -64,12 +64,12 @@ class Category:
 
 
 
-class Director(Category):
+class DirectorStats(Category):
     def __init__(self, name: str) -> None:
         super().__init__(name)
 
 
-class Country(Category):
+class CountryStats(Category):
     def __init__(self, name: str) -> None:
         super().__init__(name)
     
