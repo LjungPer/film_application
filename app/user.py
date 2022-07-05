@@ -34,6 +34,7 @@ def get_top_directors_biased(username: str, nr_items: int = 10) -> List[list]:
     return top_directors
 
 
+
 def get_directors_sorted_by_biased(username: str) -> List[Tuple]:
     user_directors = query_user_attr(username, 'Director')
     if user_directors is None:
@@ -43,6 +44,28 @@ def get_directors_sorted_by_biased(username: str) -> List[Tuple]:
     sorted_directors = sorted(user_directors, key=lambda x: x[3], reverse=True)
     return sorted_directors
 
+
+def get_top_countries_biased(username: str, nr_items: int = 10) -> List[list]:
+    sorted_countries = get_countries_sorted_by_biased(username)
+    top_countries = []
+    for i, country in zip(range(nr_items), sorted_countries):
+        name = country[1]
+        avg_rating = round(country[2], 2)
+        bias_rating = round(country[3], 2)
+        nr_films = country[4]
+        top_countries.append([name, avg_rating, bias_rating, nr_films])
+
+    return top_countries
+
+
+def get_countries_sorted_by_biased(username: str) -> List[Tuple]:
+    user_countries = query_user_attr(username, 'Country')
+    if user_countries is None:
+        update_user_category_statistics(username, 'Country')
+        user_countries = query_user_attr(username, 'Country')
+
+    sorted_countries = sorted(user_countries, key=lambda x: x[3], reverse=True)
+    return sorted_countries
 
 def update_user_statistics(username: str) -> None:
     update_user_category_statistics(username, 'Director')
@@ -55,9 +78,9 @@ def update_user_category_statistics(username: str, category_type: str) -> None:
     update_db_user_category(username, category_with_attrs, category_type)
 
 
-def collect_category(username: str, category: str) -> dict:
+def collect_category(username: str, category_type: str) -> dict:
 
-    db_category_of_db_film = query_category_of_all_db_films(category)
+    db_category_of_db_film = query_category_of_all_db_films(category_type)
     user_films = query_user_attr(username, 'Film')
     user_categories = {}
     for film in user_films:
@@ -70,7 +93,7 @@ def collect_category(username: str, category: str) -> dict:
                     user_categories[primary_key].append_film(film)
                 else:
                     user_categories[primary_key] = initialize_category(
-                        category, db_category.name)
+                        category_type, db_category.name)
                     user_categories[primary_key].append_film(film)
 
     return user_categories

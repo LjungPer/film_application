@@ -1,10 +1,10 @@
 import re
 from bs4 import BeautifulSoup, SoupStrainer
-from app.database import extract_films_not_in_db, add_films_to_db, user_in_db, add_user_to_db, update_db_user
+from app.database import extract_films_not_in_db, add_films_to_db, query_user_attr, user_in_db, add_user_to_db, update_db_user
 from app.scraping import scrape_letterboxd_urls_of_films, scrape_pages_of_user_films_by_date, get_page_count, get_user_avatar_src
-from app.models import User
 import asyncio
 from app.decorators import timed
+from typing import List
 
 
 def set_up_user(username):
@@ -28,20 +28,15 @@ def get_user_info(username):
 
     num_pages = get_page_count(username)
     avatar_url = get_user_avatar_src(username)
-    logged_films = get_user_films(username)
+    logged_films = get_user_films(username, num_pages)
 
     return num_pages, avatar_url, logged_films
 
 
 @timed
-def get_user_films(username):
+def get_user_films(username: str, num_pages: int) -> List[dict]:
 
     async def inner():
-        if user_in_db(username):
-            u = User.query.get(username)
-            num_pages = u.num_pages
-        else:
-            num_pages = get_page_count(username)
         pages_of_user_films_by_date = await scrape_pages_of_user_films_by_date(username, num_pages)
         user_films = get_user_films_from_scraped_pages(
             pages_of_user_films_by_date)

@@ -193,6 +193,8 @@ def query_user_attr(username: str, attr_type: str) -> List[Tuple]:
         return user.directors
     elif attr_type == 'Country':
         return user.countries
+    elif attr_type == 'Pages':
+        return user.num_pages
     else:
         raise TypeError('No such attribute') 
 
@@ -220,7 +222,7 @@ def update_db_user_category(username: str, category: List[Tuple], category_type:
     if category_type == 'Director':
         user.directors = category
     if category_type == 'Country':
-        user.categories = category
+        user.countries = category
     db.session.commit()
 
 def get_primary_key(category: Union[Director, Country]) -> Union[int, str]:

@@ -2,7 +2,7 @@ from flask import render_template, flash, redirect, session, url_for, jsonify
 from app import app
 from app.forms import LoginForm, UpdateDataForm
 from app.manager import update_db_with_new_films, set_up_user, update_user_info
-from app.user import get_top_directors_biased, update_user_statistics
+from app.user import get_top_directors_biased, update_user_statistics, get_top_countries_biased
 from app.models import User
 
 
@@ -43,6 +43,15 @@ def directors():
     top_directors = get_top_directors_biased(username)
 
     return jsonify(top_directors)
+
+
+@app.route('/countries', methods=["GET"])
+def countries():
+
+    username = session['username']
+    top_countries = get_top_countries_biased(username)
+
+    return jsonify(top_countries)
 
 
 @app.route('/loading', methods=['GET'])
