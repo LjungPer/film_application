@@ -2,7 +2,8 @@ import requests
 import tmdbsimple as tmdb
 from app.models import *
 from app.decorators import timed
-
+from sqlalchemy.inspection import inspect
+from typing import Union, List, Tuple
 
 @timed
 def extract_films_not_in_db(film_objects):
@@ -115,6 +116,31 @@ def add_tv_to_db(film):
     db.session.commit()
 
 
+
+@timed
+def query_category_of_all_db_films(category_type: str) -> dict:
+    """
+    Query the director of each film in the database.
+
+    Returned dictionary constructed as:
+    key - letterboxd_id(int), value - director(models.Director).
+
+    Returns
+    -------
+    dict
+        Dictionary of {int: models.Director}.
+    """
+    db_films = Film.query.all()
+    if category_type == 'Director':
+        db_category_of_db_film = {
+            film.letterboxd_id: film.director for film in db_films}
+    elif category_type == 'Country':
+        db_category_of_db_film = {
+            film.letterboxd_id: film.country for film in db_films}
+    else:
+        return {}
+    return db_category_of_db_film
+
 @timed
 def query_directors_of_all_db_films() -> dict:
     """
@@ -132,6 +158,25 @@ def query_directors_of_all_db_films() -> dict:
     db_director_of_db_film = {
         film.letterboxd_id: film.director for film in db_films}
     return db_director_of_db_film
+
+
+@timed
+def query_countries_of_all_db_films() -> dict:
+    """
+    Query the director of each film in the database.
+
+    Returned dictionary constructed as:
+    key - letterboxd_id(int), value - director(models.Director).
+
+    Returns
+    -------
+    dict
+        Dictionary of {int: models.Director}.
+    """
+    db_films = Film.query.all()
+    db_countries_of_db_film = {
+        film.letterboxd_id: film.country for film in db_films}
+    return db_countries_of_db_film
 
 
 def user_in_db(username):
@@ -161,7 +206,13 @@ def update_db_user(username, logged_films_compact, num_pages, avatar_url):
     user.avatar_url = avatar_url
     db.session.commit()
 
-def update_db_user_directors(username, directors):
+def update_db_user_category(username: str, category: List[Tuple], category_type: str) -> None:
     user = User.query.get(username)
-    user.directors = directors
+    if category_type == 'Director':
+        user.directors = category
+    if category_type == 'Country':
+        user.categories = category
     db.session.commit()
+
+def get_primary_key(category: Union[Director, Country]) -> Union[int, str]:
+    return inspect(category).identity[0]
