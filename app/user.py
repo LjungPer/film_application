@@ -7,6 +7,9 @@ def update_user_statistics(username: str) -> None:
     update_user_category(username, 'Director')
     update_user_category(username, 'Country')
     update_user_category(username, 'Year')
+    update_user_category(username, 'Actor')
+    update_user_category(username, 'Actress')
+    update_user_category(username, 'Genre')
 
 
 def update_user_category(username: str, category_type: str) -> None:
@@ -44,6 +47,12 @@ def initialize_category(category_type: str, name: str) -> Category:
         return CountryStats(name)
     elif category_type == 'Year':
         return YearStats(name)
+    elif category_type == 'Actor':
+        return ActorStats(name)
+    elif category_type == 'Actress':
+        return ActressStats(name)
+    elif category_type == 'Genre':
+        return GenreStats(name)
     else:
         return Category(name)
 
@@ -61,12 +70,12 @@ def add_attrs_to_category(categories: dict) -> List[Tuple]:
 
 
 @overload
-def get_category_attrs(key: int, category: Union[DirectorStats, YearStats]) -> Tuple[int, str, float, float, int]:
+def get_category_attrs(key: int, category: Union[DirectorStats, ActorStats, ActressStats]) -> Tuple[int, str, float, float, int]:
     ...
 
 
 @overload
-def get_category_attrs(key: str, category: CountryStats) -> Tuple[str, str, float, float, int]:
+def get_category_attrs(key: str, category: Union[CountryStats, YearStats, GenreStats]) -> Tuple[str, str, float, float, int]:
     ...
 
 
@@ -78,3 +87,15 @@ def get_category_attrs(key: Union[int, str], category: Category) -> Tuple[Union[
     nr_films = category.number_of_films
 
     return key, name, avg_rating, bias_rating, nr_films
+
+from app.models import *
+def get_user_films_from_year(username: str, year: str):
+    u = User.query.get(username)
+    y = Year.query.get(year)
+
+    user_film_ids = {id for (id,_) in u.films}
+    year_film_ids = {film.letterboxd_id for film in y.films}
+
+    user_film_ids_this_year = set.intersection(user_film_ids, year_film_ids)
+    user_films_this_year = [(Film.query.get(film[0]).title, film[0], film[1]) for film in u.films if film[0] in user_film_ids_this_year]
+    return user_films_this_year

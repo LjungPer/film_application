@@ -1,5 +1,5 @@
 from typing import List, Tuple
-from app.database import query_user_attr
+from app.database import query_user_attr, query_user_film_ids, query_year_film_ids
 from app.user import update_user_category
 
 def get_top_category_biased(username: str, category_type: str, nr_items: int = 10) -> List[list]:

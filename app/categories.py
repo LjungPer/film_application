@@ -3,10 +3,10 @@ from typing import Tuple
 
 class Category:
     def __init__(self, name: str) -> None:
-            self._name = name
-            self._average_rating = None
-            self._biased_rating = None
-            self.films = []
+        self._name = name
+        self._average_rating = None
+        self._biased_rating = None
+        self.films = []
 
     @property
     def name(self) -> str:
@@ -63,7 +63,6 @@ class Category:
         return self.average_rating * biased_factor
 
 
-
 class DirectorStats(Category):
     def __init__(self, name: str) -> None:
         super().__init__(name)
@@ -72,8 +71,23 @@ class DirectorStats(Category):
 class CountryStats(Category):
     def __init__(self, name: str) -> None:
         super().__init__(name)
-    
+
 
 class YearStats(Category):
+    def __init__(self, name: str) -> None:
+        super().__init__(name)
+
+
+class ActorStats(Category):
+    def __init__(self, name: str) -> None:
+        super().__init__(name)
+
+
+class ActressStats(Category):
+    def __init__(self, name: str) -> None:
+        super().__init__(name)
+
+
+class GenreStats(Category):
     def __init__(self, name: str) -> None:
         super().__init__(name)

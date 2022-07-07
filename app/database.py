@@ -4,7 +4,9 @@ import tmdbsimple as tmdb
 from app.models import *
 from app.decorators import timed
 from sqlalchemy.inspection import inspect
-from typing import Union, List, Tuple
+from typing import Union, List, Tuple, Set
+
+DatabaseType = Union[Director, Country, Year, Actor, Actress, Genre]
 
 @timed
 def extract_films_not_in_db(film_objects):
@@ -19,7 +21,7 @@ def extract_films_not_in_db(film_objects):
     return films_not_in_db
 
 
-def find_all_ids_in_db():
+def find_all_ids_in_db() -> Set[int]:
     film_ids = db.session.query(Film.letterboxd_id).all()
     tv_ids = db.session.query(Tv.letterboxd_id).all()
     misc_ids = db.session.query(Miscellaneous.letterboxd_id).all()
@@ -33,7 +35,8 @@ def find_all_ids_in_db():
 def add_films_to_db(films_not_in_db):
     nr_films = len(films_not_in_db)
     for i, film in zip(range(nr_films), films_not_in_db):
-        print(film['film_title'], film['tmdb_id'], '{}/{}'.format(i + 1, nr_films))
+        print(film['film_title'], film['tmdb_id'],
+              '{}/{}'.format(i + 1, nr_films))
         if film['movie']:
             add_movie_and_director_to_db(film)
         if film['tv']:
@@ -86,9 +89,42 @@ def add_movie_and_director_to_db(film):
         db_year = Year(name=release_year)
         db_year.films.append(db_film)
         db.session.add(db_year)
-    
 
+    ''' This part adds actor to the database '''
+    cast = tmdb_film.credits()['cast']
+    nr_actors = max(len(cast)//4, 15)
+    actors = [credit for i, credit in zip(
+        range(nr_actors), cast) if credit['gender'] == 2]
+    actresses = [credit for i, credit in zip(
+        range(nr_actors), cast) if credit['gender'] == 1]
+
+    for actor in actors:
+        if actor_is_in_db(actor):
+            Actor.query.get(actor['id']).films.append(db_film)
+        else:
+            db_actor = Actor(id=actor['id'], name=actor['name'])
+            db_actor.films.append(db_film)
+            db.session.add(db_actor)
+
+    for actress in actresses:
+        if actress_is_in_db(actress):
+            Actress.query.get(actress['id']).films.append(db_film)
+        else:
+            db_actress = Actress(id=actress['id'], name=actress['name'])
+            db_actress.films.append(db_film)
+            db.session.add(db_actress)
+
+    ''' This part adds genre to the database '''
+    genres = tmdb_film_info['genres']
+    for genre in genres:
+        if genre_is_in_db(genre):
+            Genre.query.get(genre['name']).films.append(db_film)
+        else:
+            db_genre = Genre(name=genre['name'])
+            db_genre.films.append(db_film)
+            db.session.add(db_genre)
     db.session.commit()
+
 
 def find_directors_of_movie(tmdb_film):
     directors = [credit for credit in tmdb_film.credits()['crew']
@@ -116,11 +152,26 @@ def add_misc_to_db(film):
 def director_is_in_db(director: dict) -> bool:
     return Director.query.get(int(director['id'])) is not None
 
+
 def country_is_in_db(country: dict) -> bool:
     return Country.query.get(country['name']) is not None
 
+
 def year_is_in_db(year: str) -> bool:
     return Year.query.get(year) is not None
+
+
+def actor_is_in_db(actor: dict) -> bool:
+    return Actor.query.get(actor['id']) is not None
+
+
+def actress_is_in_db(actress: dict) -> bool:
+    return Actress.query.get(actress['id']) is not None
+
+
+def genre_is_in_db(genre: dict) -> bool:
+    return Genre.query.get(genre['name']) is not None
+
 
 def add_tv_to_db(film):
     print(film['film_title'], film['tmdb_id'])
@@ -130,7 +181,6 @@ def add_tv_to_db(film):
         film['letterboxd_id']))
     db.session.add(db_tv)
     db.session.commit()
-
 
 
 @timed
@@ -156,6 +206,15 @@ def query_category_of_all_db_films(category_type: str) -> dict:
     elif category_type == 'Year':
         db_category_of_db_film = {
             film.letterboxd_id: film.year for film in db_films}
+    elif category_type == 'Actor':
+        db_category_of_db_film = {
+            film.letterboxd_id: film.actor for film in db_films}
+    elif category_type == 'Actress':
+        db_category_of_db_film = {
+            film.letterboxd_id: film.actress for film in db_films}
+    elif category_type == 'Genre':
+        db_category_of_db_film = {
+            film.letterboxd_id: film.genre for film in db_films}
     else:
         return {}
     return db_category_of_db_film
@@ -175,10 +234,16 @@ def query_user_attr(username: str, attr_type: str) -> List[Tuple]:
         return user.countries
     elif attr_type == 'Year':
         return user.years
+    elif attr_type == 'Actor':
+        return user.actors
+    elif attr_type == 'Actress':
+        return user.actresses
+    elif attr_type == 'Genre':
+        return user.genres
     elif attr_type == 'Pages':
         return user.num_pages
     else:
-        raise TypeError('No such attribute') 
+        raise TypeError('No such attribute')
 
 
 def add_user_to_db(username, logged_films_compact, num_pages, avatar_url):
@@ -194,10 +259,11 @@ def add_user_to_db(username, logged_films_compact, num_pages, avatar_url):
 
 def update_db_user(username, logged_films_compact, num_pages, avatar_url):
     user = User.query.get(username)
-    user.films= logged_films_compact
+    user.films = logged_films_compact
     user.num_pages = num_pages
     user.avatar_url = avatar_url
     db.session.commit()
+
 
 def update_db_user_category(username: str, category: List[Tuple], category_type: str) -> None:
     user = User.query.get(username)
@@ -207,7 +273,38 @@ def update_db_user_category(username: str, category: List[Tuple], category_type:
         user.countries = category
     if category_type == 'Year':
         user.years = category
+    if category_type == 'Actor':
+        user.actors = category
+    if category_type == 'Actress':
+        user.actresses = category
+    if category_type == 'Genre':
+        user.genres = category
     db.session.commit()
 
-def get_primary_key(category: Union[Director, Country]) -> Union[int, str]:
+
+def get_primary_key(category: DatabaseType) -> Union[int, str]:
     return inspect(category).identity[0]
+
+def query_user_film_ids(username: str) -> Set[int]:
+    
+    u = User.query.get(username)
+    user_film_ids = {id for (id,_) in u.films}
+    return user_film_ids
+
+
+def query_year_film_ids(year: str) -> Set[int]:
+    
+    y = Year.query.get(year)
+    year_film_ids = {film.letterboxd_id for film in y.films}
+    return year_film_ids
+
+def query_user_films_from_year(username: str, year: str) -> List[Tuple[str, int, int]]:
+    u = User.query.get(username)
+    y = Year.query.get(year)
+
+    user_film_ids = {id for (id,_) in u.films}
+    year_film_ids = {film.letterboxd_id for film in y.films}
+
+    user_film_ids_this_year = set.intersection(user_film_ids, year_film_ids)
+    user_films_this_year = [(Film.query.get(film[0]).title, film[0], film[1]) for film in u.films if film[0] in user_film_ids_this_year]
+    return user_films_this_year
