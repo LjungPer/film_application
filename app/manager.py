@@ -10,9 +10,9 @@ from typing import List
 def set_up_user(username):
 
     if not user_in_db(username):
-        num_pages, avatar_url, logged_films = get_user_info(username)
+        pages, avatar_url, logged_films = get_user_info(username)
         logged_films_compact = convert_logged_films_to_tuples(logged_films)
-        add_user_to_db(username, logged_films_compact, num_pages, avatar_url)
+        add_user_to_db(username, logged_films_compact, pages, avatar_url)
 
 
 def update_user_info(username, return_logged_films=False):

@@ -149,30 +149,6 @@ def add_misc_to_db(film):
     db.session.commit()
 
 
-def director_is_in_db(director: dict) -> bool:
-    return Director.query.get(int(director['id'])) is not None
-
-
-def country_is_in_db(country: dict) -> bool:
-    return Country.query.get(country['name']) is not None
-
-
-def year_is_in_db(year: str) -> bool:
-    return Year.query.get(year) is not None
-
-
-def actor_is_in_db(actor: dict) -> bool:
-    return Actor.query.get(actor['id']) is not None
-
-
-def actress_is_in_db(actress: dict) -> bool:
-    return Actress.query.get(actress['id']) is not None
-
-
-def genre_is_in_db(genre: dict) -> bool:
-    return Genre.query.get(genre['name']) is not None
-
-
 def add_tv_to_db(film):
     print(film['film_title'], film['tmdb_id'])
     tmdb_film = tmdb.TV(film['tmdb_id'])
@@ -197,7 +173,8 @@ def query_category_of_all_db_films(category_type: str) -> dict:
         Dictionary of {int: models.*}.
     """
     db_films = Film.query.all()
-    db_category_of_db_film = {film.letterboxd_id: getattr(film, category_type.lower()) for film in db_films}
+    db_category_of_db_film = {film.letterboxd_id: getattr(
+        film, category_type.lower()) for film in db_films}
     return db_category_of_db_film
 
 
@@ -223,7 +200,7 @@ def add_user_to_db(username, logged_films_compact, pages, avatar_url):
 
 def update_db_user(username, logged_films_compact, pages, avatar_url):
     user = User.query.get(username)
-    user.films= logged_films_compact
+    user.films = logged_films_compact
     user.pages = pages
     user.avatar_url = avatar_url
     db.session.commit()
@@ -250,3 +227,27 @@ def query_user_films_from_year(username: str, year: str) -> List[Tuple[str, int,
     user_films_this_year = [(Film.query.get(film[0]).title, film[0], film[1])
                             for film in u.film if film[0] in user_film_ids_this_year]
     return user_films_this_year
+
+
+def director_is_in_db(director: dict) -> bool:
+    return Director.query.get(int(director['id'])) is not None
+
+
+def country_is_in_db(country: dict) -> bool:
+    return Country.query.get(country['name']) is not None
+
+
+def year_is_in_db(year: str) -> bool:
+    return Year.query.get(year) is not None
+
+
+def actor_is_in_db(actor: dict) -> bool:
+    return Actor.query.get(actor['id']) is not None
+
+
+def actress_is_in_db(actress: dict) -> bool:
+    return Actress.query.get(actress['id']) is not None
+
+
+def genre_is_in_db(genre: dict) -> bool:
+    return Genre.query.get(genre['name']) is not None

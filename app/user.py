@@ -1,5 +1,5 @@
 from app.database import query_user_attr, update_db_user_category, query_category_of_all_db_films, get_primary_key
-from typing import Tuple, List, Union, overload
+from typing import Tuple, List, Union
 from app.categories import *
 
 
@@ -36,6 +36,7 @@ def collect_category(username: str, category_type: str) -> dict:
                     user_categories[primary_key].append_film(film)
 
     return user_categories
+
 
 
 def add_attrs_to_category(categories: dict) -> List[Tuple]:
