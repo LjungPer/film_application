@@ -76,6 +76,18 @@ def add_movie_and_director_to_db(film):
             db_country = Country(name=country['name'])
             db_country.films.append(db_film)
             db.session.add(db_country)
+
+    ''' This part adds year to the database '''
+    release_date = tmdb_film_info['release_date']
+    release_year = release_date.partition('-')[0]
+    if year_is_in_db(release_year):
+        Year.query.get(release_year).films.append(db_film)
+    else:
+        db_year = Year(name=release_year)
+        db_year.films.append(db_film)
+        db.session.add(db_year)
+    
+
     db.session.commit()
 
 def find_directors_of_movie(tmdb_film):
@@ -101,12 +113,14 @@ def add_misc_to_db(film):
     db.session.commit()
 
 
-def director_is_in_db(director):
+def director_is_in_db(director: dict) -> bool:
     return Director.query.get(int(director['id'])) is not None
 
-def country_is_in_db(country):
+def country_is_in_db(country: dict) -> bool:
     return Country.query.get(country['name']) is not None
 
+def year_is_in_db(year: str) -> bool:
+    return Year.query.get(year) is not None
 
 def add_tv_to_db(film):
     print(film['film_title'], film['tmdb_id'])
@@ -122,15 +136,15 @@ def add_tv_to_db(film):
 @timed
 def query_category_of_all_db_films(category_type: str) -> dict:
     """
-    Query the director of each film in the database.
+    Query the category of each film in the database.
 
     Returned dictionary constructed as:
-    key - letterboxd_id(int), value - director(models.Director).
+    key - letterboxd_id(int), value - category.
 
     Returns
     -------
     dict
-        Dictionary of {int: models.Director}.
+        Dictionary of {int: models.*}.
     """
     db_films = Film.query.all()
     if category_type == 'Director':
@@ -139,46 +153,12 @@ def query_category_of_all_db_films(category_type: str) -> dict:
     elif category_type == 'Country':
         db_category_of_db_film = {
             film.letterboxd_id: film.country for film in db_films}
+    elif category_type == 'Year':
+        db_category_of_db_film = {
+            film.letterboxd_id: film.year for film in db_films}
     else:
         return {}
     return db_category_of_db_film
-
-@timed
-def query_directors_of_all_db_films() -> dict:
-    """
-    Query the director of each film in the database.
-
-    Returned dictionary constructed as:
-    key - letterboxd_id(int), value - director(models.Director).
-
-    Returns
-    -------
-    dict
-        Dictionary of {int: models.Director}.
-    """
-    db_films = Film.query.all()
-    db_director_of_db_film = {
-        film.letterboxd_id: film.director for film in db_films}
-    return db_director_of_db_film
-
-
-@timed
-def query_countries_of_all_db_films() -> dict:
-    """
-    Query the director of each film in the database.
-
-    Returned dictionary constructed as:
-    key - letterboxd_id(int), value - director(models.Director).
-
-    Returns
-    -------
-    dict
-        Dictionary of {int: models.Director}.
-    """
-    db_films = Film.query.all()
-    db_countries_of_db_film = {
-        film.letterboxd_id: film.country for film in db_films}
-    return db_countries_of_db_film
 
 
 def user_in_db(username):
@@ -188,11 +168,13 @@ def user_in_db(username):
 def query_user_attr(username: str, attr_type: str) -> List[Tuple]:
     user = User.query.get(username)
     if attr_type == 'Film':
-        return user.logged_films
+        return user.films
     elif attr_type == 'Director':
         return user.directors
     elif attr_type == 'Country':
         return user.countries
+    elif attr_type == 'Year':
+        return user.years
     elif attr_type == 'Pages':
         return user.num_pages
     else:
@@ -201,7 +183,7 @@ def query_user_attr(username: str, attr_type: str) -> List[Tuple]:
 
 def add_user_to_db(username, logged_films_compact, num_pages, avatar_url):
     user = User(username=username,
-                logged_films=logged_films_compact,
+                films=logged_films_compact,
                 num_pages=num_pages,
                 avatar_url=avatar_url,
                 directors=None)
@@ -212,7 +194,7 @@ def add_user_to_db(username, logged_films_compact, num_pages, avatar_url):
 
 def update_db_user(username, logged_films_compact, num_pages, avatar_url):
     user = User.query.get(username)
-    user.logged_films = logged_films_compact
+    user.films= logged_films_compact
     user.num_pages = num_pages
     user.avatar_url = avatar_url
     db.session.commit()
@@ -223,6 +205,8 @@ def update_db_user_category(username: str, category: List[Tuple], category_type:
         user.directors = category
     if category_type == 'Country':
         user.countries = category
+    if category_type == 'Year':
+        user.years = category
     db.session.commit()
 
 def get_primary_key(category: Union[Director, Country]) -> Union[int, str]:

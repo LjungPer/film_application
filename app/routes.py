@@ -2,7 +2,8 @@ from flask import render_template, flash, redirect, session, url_for, jsonify
 from app import app
 from app.forms import LoginForm, UpdateDataForm
 from app.manager import update_db_with_new_films, set_up_user, update_user_info
-from app.user import get_top_category_biased, update_user_statistics, get_top_category_biased
+from app.user import update_user_statistics
+from app.fetch import get_top_category_biased
 from app.models import User
 
 
@@ -40,7 +41,8 @@ def stats():
 def categories(category_type):
     
     username = session['username']
-    return jsonify(get_top_category_biased(username, str(category_type)))
+    top_category_biased = get_top_category_biased(username, str(category_type))
+    return jsonify(top_category_biased)
 
 
 @app.route('/loading', methods=['GET'])

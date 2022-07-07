@@ -1,36 +1,12 @@
 from app.database import query_user_attr, update_db_user_category, query_category_of_all_db_films, get_primary_key
-from typing import Tuple, List, Union
-from app.categories import DirectorStats, CountryStats, Category
-
-
-def get_top_category_biased(username: str, category_type: str, nr_items: int = 10) -> List[list]:
-
-    sorted_category = get_category_sorted_by_biased(username, category_type)
-    top_category = []
-    for i, category in zip(range(nr_items), sorted_category):
-        name = category[1]
-        avg_rating = round(category[2], 2)
-        bias_rating = round(category[3], 2)
-        nr_films = category[4]
-        top_category.append([name, avg_rating, bias_rating, nr_films])
-
-    return top_category
-
-
-def get_category_sorted_by_biased(username: str, category_type: str) -> List[Tuple]:
-
-    user_category = query_user_attr(username, category_type)
-    if user_category is None:
-        update_user_category(username, category_type)
-        user_category = query_user_attr(username, category_type)
-
-    sorted_category = sorted(user_category, key=lambda x: x[3], reverse=True)
-    return sorted_category
+from typing import Tuple, List, Union, overload
+from app.categories import *
 
 
 def update_user_statistics(username: str) -> None:
     update_user_category(username, 'Director')
     update_user_category(username, 'Country')
+    update_user_category(username, 'Year')
 
 
 def update_user_category(username: str, category_type: str) -> None:
@@ -60,12 +36,14 @@ def collect_category(username: str, category_type: str) -> dict:
     return user_categories
 
 
-def initialize_category(category_type, name) -> Category:
+def initialize_category(category_type: str, name: str) -> Category:
 
     if category_type == 'Director':
         return DirectorStats(name)
     elif category_type == 'Country':
         return CountryStats(name)
+    elif category_type == 'Year':
+        return YearStats(name)
     else:
         return Category(name)
 
@@ -82,7 +60,17 @@ def add_attrs_to_category(categories: dict) -> List[Tuple]:
     return categories_with_attrs
 
 
-def get_category_attrs(key: Union[int, str], category: Union[DirectorStats, CountryStats]) -> Tuple[Union[int, str], str, float, float, int]:
+@overload
+def get_category_attrs(key: int, category: Union[DirectorStats, YearStats]) -> Tuple[int, str, float, float, int]:
+    ...
+
+
+@overload
+def get_category_attrs(key: str, category: CountryStats) -> Tuple[str, str, float, float, int]:
+    ...
+
+
+def get_category_attrs(key: Union[int, str], category: Category) -> Tuple[Union[int, str], str, float, float, int]:
 
     name = category.name
     avg_rating = category.average_rating

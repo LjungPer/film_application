@@ -73,3 +73,7 @@ class CountryStats(Category):
     def __init__(self, name: str) -> None:
         super().__init__(name)
     
+
+class YearStats(Category):
+    def __init__(self, name: str) -> None:
+        super().__init__(name)
