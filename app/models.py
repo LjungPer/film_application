@@ -119,15 +119,15 @@ class Miscellaneous(db.Model):
 
 class User(db.Model):
     username = db.Column(db.String(128), primary_key=True)
-    films = db.Column(db.PickleType)
-    num_pages = db.Column(db.Integer)
+    film = db.Column(db.PickleType)
+    pages = db.Column(db.Integer)
     avatar_url = db.Column(db.String(128))
-    directors = db.Column(db.PickleType)
-    countries = db.Column(db.PickleType)
-    years = db.Column(db.PickleType)
-    actors = db.Column(db.PickleType)
-    actresses = db.Column(db.PickleType)
-    genres = db.Column(db.PickleType)
+    director = db.Column(db.PickleType)
+    country = db.Column(db.PickleType)
+    year = db.Column(db.PickleType)
+    actor = db.Column(db.PickleType)
+    actress = db.Column(db.PickleType)
+    genre = db.Column(db.PickleType)
 
     def __repr__(self):
         return '<User {}>'.format(self.username)

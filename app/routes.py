@@ -25,16 +25,16 @@ def stats():
     form = UpdateDataForm()
     username = session['username']
     u = User.query.get(username)
-    num_pages = u.num_pages
+    pages = u.pages
     avatar_url = u.avatar_url
-    if num_pages == -1:
+    if pages == -1:
         flash('No user found. Try another username.')
         return redirect(url_for('login'))
 
     if form.validate_on_submit():
         return redirect(url_for('loading'))
 
-    return render_template('stats.html', num_pages=num_pages, username=username, avatar_url=avatar_url, form=form)
+    return render_template('stats.html', num_pages=pages, username=username, avatar_url=avatar_url, form=form)
 
 
 @app.route('/categories/<category_type>', methods=["GET"])

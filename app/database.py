@@ -1,4 +1,3 @@
-from attr import attr
 import requests
 import tmdbsimple as tmdb
 from app.models import *
@@ -7,6 +6,7 @@ from sqlalchemy.inspection import inspect
 from typing import Union, List, Tuple, Set
 
 DatabaseType = Union[Director, Country, Year, Actor, Actress, Genre]
+
 
 @timed
 def extract_films_not_in_db(film_objects):
@@ -197,26 +197,7 @@ def query_category_of_all_db_films(category_type: str) -> dict:
         Dictionary of {int: models.*}.
     """
     db_films = Film.query.all()
-    if category_type == 'Director':
-        db_category_of_db_film = {
-            film.letterboxd_id: film.director for film in db_films}
-    elif category_type == 'Country':
-        db_category_of_db_film = {
-            film.letterboxd_id: film.country for film in db_films}
-    elif category_type == 'Year':
-        db_category_of_db_film = {
-            film.letterboxd_id: film.year for film in db_films}
-    elif category_type == 'Actor':
-        db_category_of_db_film = {
-            film.letterboxd_id: film.actor for film in db_films}
-    elif category_type == 'Actress':
-        db_category_of_db_film = {
-            film.letterboxd_id: film.actress for film in db_films}
-    elif category_type == 'Genre':
-        db_category_of_db_film = {
-            film.letterboxd_id: film.genre for film in db_films}
-    else:
-        return {}
+    db_category_of_db_film = {film.letterboxd_id: getattr(film, category_type.lower()) for film in db_films}
     return db_category_of_db_film
 
 
@@ -226,85 +207,46 @@ def user_in_db(username):
 
 def query_user_attr(username: str, attr_type: str) -> List[Tuple]:
     user = User.query.get(username)
-    if attr_type == 'Film':
-        return user.films
-    elif attr_type == 'Director':
-        return user.directors
-    elif attr_type == 'Country':
-        return user.countries
-    elif attr_type == 'Year':
-        return user.years
-    elif attr_type == 'Actor':
-        return user.actors
-    elif attr_type == 'Actress':
-        return user.actresses
-    elif attr_type == 'Genre':
-        return user.genres
-    elif attr_type == 'Pages':
-        return user.num_pages
-    else:
-        raise TypeError('No such attribute')
+    return getattr(user, attr_type.lower())
 
 
-def add_user_to_db(username, logged_films_compact, num_pages, avatar_url):
+def add_user_to_db(username, logged_films_compact, pages, avatar_url):
     user = User(username=username,
-                films=logged_films_compact,
-                num_pages=num_pages,
+                film=logged_films_compact,
+                pages=pages,
                 avatar_url=avatar_url,
-                directors=None)
+                director=None)
     db.session.add(user)
     db.session.commit()
     print('User {} added to database'.format(username))
 
 
-def update_db_user(username, logged_films_compact, num_pages, avatar_url):
+def update_db_user(username, logged_films_compact, pages, avatar_url):
     user = User.query.get(username)
-    user.films = logged_films_compact
-    user.num_pages = num_pages
+    user.films= logged_films_compact
+    user.pages = pages
     user.avatar_url = avatar_url
     db.session.commit()
 
 
 def update_db_user_category(username: str, category: List[Tuple], category_type: str) -> None:
     user = User.query.get(username)
-    if category_type == 'Director':
-        user.directors = category
-    if category_type == 'Country':
-        user.countries = category
-    if category_type == 'Year':
-        user.years = category
-    if category_type == 'Actor':
-        user.actors = category
-    if category_type == 'Actress':
-        user.actresses = category
-    if category_type == 'Genre':
-        user.genres = category
+    setattr(user, category_type.lower(), category)
     db.session.commit()
 
 
 def get_primary_key(category: DatabaseType) -> Union[int, str]:
     return inspect(category).identity[0]
 
-def query_user_film_ids(username: str) -> Set[int]:
-    
-    u = User.query.get(username)
-    user_film_ids = {id for (id,_) in u.films}
-    return user_film_ids
-
-
-def query_year_film_ids(year: str) -> Set[int]:
-    
-    y = Year.query.get(year)
-    year_film_ids = {film.letterboxd_id for film in y.films}
-    return year_film_ids
 
 def query_user_films_from_year(username: str, year: str) -> List[Tuple[str, int, int]]:
     u = User.query.get(username)
     y = Year.query.get(year)
 
-    user_film_ids = {id for (id,_) in u.films}
+    user_film_ids = {id for (id, _) in u.film}
     year_film_ids = {film.letterboxd_id for film in y.films}
 
     user_film_ids_this_year = set.intersection(user_film_ids, year_film_ids)
-    user_films_this_year = [(Film.query.get(film[0]).title, film[0], film[1]) for film in u.films if film[0] in user_film_ids_this_year]
+    user_films_this_year = [(Film.query.get(film[0]).title, film[0], film[1])
+                            for film in u.film if film[0] in user_film_ids_this_year]
     return user_films_this_year
