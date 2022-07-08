@@ -8,19 +8,15 @@
     <div><p>A simple app where you provide your letterboxd username, and we provide you with some data.</p></div>
 
     <div id="buttons">
-       <button class="action_btn" onclick='topDirectorsButton()'>Top directors</button>
+       <button class="action_btn" onclick="topDirectorButton('biased')">Top directors</button>
+       <button class="action_btn" onclick="topCountryButton('biased')">Top countries</button>
         <form action="" method="post" novalidate>
         {{ form.hidden_tag() }}
         <p>{{ form.submit() }}</p>
     </form>
     </div>
     <p id="loading_text"></p>
-    <div id="Director" style="text-align:center"></div>
-    <div id="Country" style="text-align:center"></div>
-    <div id="Year" style="text-align:center"></div>
-    <div id="Actor" style="text-align:center"></div>
-    <div id="Actress" style="text-align:center"></div>
-    <div id="Genre" style="text-align:center"></div>
+    <div id="Statistics" style="text-align:center"></div>
 
     <script>
 
@@ -29,12 +25,23 @@
             var table = document.createElement("table");
             
 
-            const titles = [title, "Average", "Biased", "#films"];
+            const titles = [title, "Average", "Biased", "Films"];
             var tr = table.insertRow();
             for (var k = 0; k < titles.length; k++) {
                 var cell = tr.insertCell();
-                cell.innerHTML = titles[k];
-                cell.style.fontWeight = 'bold';
+                if (k == 0) {
+                    cell.innerHTML = titles[k];
+                    cell.style.fontWeight = 'bold';
+                }
+                else {
+                    var link = document.createElement("a");
+                    let arg = titles[k].toLowerCase();
+                    link.setAttribute('onclick', `return top` + title + `Button("${arg}")`);
+                    var linkText = document.createTextNode(titles[k]);
+                    link.appendChild(linkText);
+                    link.style.fontWeight = 'bold';
+                    cell.appendChild(link);
+                }
             }
             
             for (var i = 0; i < data.length; i++) {
@@ -50,15 +57,15 @@
             return table;
         }
 
-        var fetchCategory = function(title) {
+        var fetchCategory = function(title, sorting_type) {
             console.log("fetching directors data");
             $.ajax({
                 type: "GET",
-                url: "/categories/" + title}).done(function(jsonData) {
+                url: "/categories/" + title + '/' + sorting_type}).done(function(jsonData) {
                 console.log("success ");
                 $("#loading_text").hide();
                 var table = createCategoryTableFromJson(jsonData, title);
-                var div = document.getElementById(title);
+                var div = document.getElementById('Statistics');
                 div.innerHTML = "";
                 div.appendChild(table);
             }).fail(function() {
@@ -66,15 +73,15 @@
             });
         }
 
-        function topDirectorsButton() {
+        function topDirectorButton(sorting_type) {
             var p = document.getElementById("loading_text");
             p.textContent = "Loading";
-            fetchCategory('Director');
-            fetchCategory('Country');
-            fetchCategory('Year');
-            fetchCategory('Actor');
-            fetchCategory('Actress');
-            fetchCategory('Genre');
+            fetchCategory('Director', sorting_type);
+        }
+        function topCountryButton(sorting_type) {
+            var p = document.getElementById("loading_text");
+            p.textContent = "Loading";
+            fetchCategory('Country', sorting_type);
         }
 
     </script>

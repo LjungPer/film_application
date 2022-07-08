@@ -3,7 +3,7 @@ from app import app
 from app.forms import LoginForm, UpdateDataForm
 from app.manager import update_db_with_new_films, set_up_user, update_user_info
 from app.user import update_user_statistics
-from app.fetch import get_top_category_biased
+from app.fetch import get_top_category
 from app.models import User
 
 
@@ -37,11 +37,11 @@ def stats():
     return render_template('stats.html', num_pages=pages, username=username, avatar_url=avatar_url, form=form)
 
 
-@app.route('/categories/<category_type>', methods=["GET"])
-def categories(category_type):
+@app.route('/categories/<category_type>/<sorting_type>', methods=["GET"])
+def categories(category_type, sorting_type):
     
     username = session['username']
-    top_category_biased = get_top_category_biased(username, str(category_type))
+    top_category_biased = get_top_category(username, str(category_type), sorting_type=str(sorting_type))
     return jsonify(top_category_biased)
 
 
