@@ -20,13 +20,19 @@ def get_top_category(username: str, category_type: str, sorting_type='biased', n
 
 def get_category_sorted_by_biased(username: str, category_type: str, sorting_type: str) -> List[Tuple]:
 
-    user_category = query_user_attr(username, category_type)
-    if user_category is None:
-        update_user_category(username, category_type)
-        user_category = query_user_attr(username, category_type)
-
+    user_category = get_user_category(username, category_type)
     sorting_key = {'average': 2, 'biased': 3, 'films': 4}
 
     sorted_category = sorted(
         user_category, key=lambda x: x[sorting_key[sorting_type]], reverse=True)
     return sorted_category
+
+
+def get_user_category(username: str, category_type: str) -> List[Tuple]:
+
+    user_category = query_user_attr(username, category_type)
+    if user_category is None:
+        update_user_category(username, category_type)
+        user_category = query_user_attr(username, category_type)
+
+    return user_category

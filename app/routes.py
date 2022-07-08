@@ -1,6 +1,6 @@
 from flask import render_template, flash, redirect, session, url_for, jsonify
 from app import app
-from app.forms import LoginForm, UpdateDataForm
+from app.forms import LoginForm, UpdateDataForm, FetchYearDataForm
 from app.manager import update_db_with_new_films, set_up_user, update_user_info
 from app.user import update_user_statistics
 from app.fetch import get_top_category
@@ -22,7 +22,8 @@ def login():
 
 @app.route('/stats', methods=['GET', 'POST'])
 def stats():
-    form = UpdateDataForm()
+    update_data_form = UpdateDataForm()
+    fetch_year_form = FetchYearDataForm()
     username = session['username']
     u = User.query.get(username)
     pages = u.pages
@@ -31,17 +32,21 @@ def stats():
         flash('No user found. Try another username.')
         return redirect(url_for('login'))
 
-    if form.validate_on_submit():
+    if update_data_form.validate_on_submit():
         return redirect(url_for('loading'))
 
-    return render_template('stats.html', num_pages=pages, username=username, avatar_url=avatar_url, form=form)
+    if fetch_year_form.validate_on_submit():
+        return redirect(url_for('login'))
+
+    return render_template('stats.html', num_pages=pages, username=username, avatar_url=avatar_url, form=update_data_form, year_form=fetch_year_form)
 
 
 @app.route('/categories/<category_type>/<sorting_type>', methods=["GET"])
 def categories(category_type, sorting_type):
-    
+
     username = session['username']
-    top_category_biased = get_top_category(username, str(category_type), sorting_type=str(sorting_type))
+    top_category_biased = get_top_category(username, str(
+        category_type), sorting_type=str(sorting_type))
     return jsonify(top_category_biased)
 
 
