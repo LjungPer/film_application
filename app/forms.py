@@ -14,5 +14,5 @@ class UpdateDataForm(FlaskForm):
 
 
 class FetchYearDataForm(FlaskForm):
-    username = StringField('Search year', validators=[DataRequired()])
+    year = StringField('Search year', validators=[DataRequired()])
     submit = SubmitField('Check')

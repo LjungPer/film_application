@@ -23,7 +23,7 @@ def login():
 @app.route('/stats', methods=['GET', 'POST'])
 def stats():
     update_data_form = UpdateDataForm()
-    fetch_year_form = FetchYearDataForm()
+    year_form = FetchYearDataForm()
     username = session['username']
     u = User.query.get(username)
     pages = u.pages
@@ -32,13 +32,16 @@ def stats():
         flash('No user found. Try another username.')
         return redirect(url_for('login'))
 
+    if year_form.validate_on_submit() and year_form.year.data:
+        year = year_form.year.data
+        session['year'] = year
+        return redirect(url_for('year'))
+
     if update_data_form.validate_on_submit():
         return redirect(url_for('loading'))
 
-    if fetch_year_form.validate_on_submit():
-        return redirect(url_for('login'))
 
-    return render_template('stats.html', num_pages=pages, username=username, avatar_url=avatar_url, form=update_data_form, year_form=fetch_year_form)
+    return render_template('stats.html', num_pages=pages, username=username, avatar_url=avatar_url, form=update_data_form, year_form=year_form)
 
 
 @app.route('/categories/<category_type>/<sorting_type>', methods=["GET"])
@@ -64,3 +67,8 @@ def update_data():
     update_user_statistics(username)
 
     return redirect(url_for('stats'))
+
+@app.route('/year', methods=['GET'])
+def year():
+    year = session['year']
+    return render_template('year.html', year=year)
