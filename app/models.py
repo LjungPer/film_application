@@ -83,6 +83,7 @@ class Film(db.Model):
     letterboxd_id = db.Column(db.Integer, primary_key=True)
     tmdb_id = db.Column(db.Integer, index=True, unique=True)
     title = db.Column(db.String(128))
+    poster_url = db.Column(db.String(128))
     director = db.relationship(
         'Director', secondary=director_film_table, backref=db.backref('films', lazy='dynamic'))
     country = db.relationship(

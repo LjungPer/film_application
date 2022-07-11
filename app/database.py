@@ -55,8 +55,9 @@ def add_movie_and_director_to_db(film):
     ''' This part adds the film to the database. '''
     tmdb_film = tmdb.Movies(film['tmdb_id'])
     tmdb_film_info = tmdb_film.info()
+    poster_url = 'https://image.tmdb.org/t/p/original' + tmdb_film_info['poster_path']
     db_film = Film(tmdb_id=int(film['tmdb_id']), title=tmdb_film_info['title'],
-                   letterboxd_id=int(film['letterboxd_id']))
+                   letterboxd_id=int(film['letterboxd_id']), poster_url=poster_url)
     db.session.add(db_film)
 
     ''' This part adds the director to the database. '''
@@ -224,8 +225,13 @@ def query_user_films_from_year(username: str, year: str) -> List[Tuple[str, int,
     year_film_ids = {film.letterboxd_id for film in y.films}
 
     user_film_ids_this_year = set.intersection(user_film_ids, year_film_ids)
-    user_films_this_year = [(Film.query.get(film[0]).title, film[0], film[1])
-                            for film in u.film if film[0] in user_film_ids_this_year]
+    user_films_this_year = []
+    for film in u.film:
+        if film[0] in user_film_ids_this_year:
+            db_film = Film.query.get(film[0])
+            tmp = (db_film.title, film[0], film[1], db_film.poster_url)
+            user_films_this_year.append(tmp)
+
     return user_films_this_year
 
 

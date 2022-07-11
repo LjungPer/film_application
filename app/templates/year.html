@@ -1,5 +1,35 @@
 {% extends "base.html" %}
 {% block content %}
 <h1>Stats for year {{ year }}</h1>
+<body>
+
+<div style="width: 100%; overflow: hidden;">
+    <div id="Statistics" style="width: 600px; float: left; text-align:center;">
+        <table class="yearTable">
+            <tr class="yearRow">
+                <th class="yearColumn"></th>
+                <th class="yearColumn">Title</th>
+                <th class="yearColumn">Rating</th>
+            </tr>
+            {% for i in data %}
+            <tr class="yearRow">
+                <td class="yearColumn">
+                    <a href={{ i.3 }}>
+                        <img height="67" width="45" src={{ i.3 }}>
+                    </a>
+                </td>
+                <td class="yearColumn">
+                    {{ loop.index }}. {{ i.0 }}
+                </td>
+                <td class="yearColumn">{{ i.2 }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+
+</body>
+
+
 
 {% endblock %}

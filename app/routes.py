@@ -1,3 +1,4 @@
+import json
 from flask import render_template, flash, redirect, session, url_for, jsonify
 from app import app
 from app.forms import LoginForm, UpdateDataForm, FetchYearDataForm
@@ -5,6 +6,7 @@ from app.manager import update_db_with_new_films, set_up_user, update_user_info
 from app.user import update_user_statistics
 from app.fetch import get_top_category
 from app.models import User
+from app.database import query_user_films_from_year
 
 
 @app.route('/')
@@ -71,4 +73,9 @@ def update_data():
 @app.route('/year', methods=['GET'])
 def year():
     year = session['year']
-    return render_template('year.html', year=year)
+    username = session['username']
+    user_films_from_year = query_user_films_from_year(username, year)
+    sorted_films = sorted(
+        user_films_from_year, key=lambda x: x[2], reverse=True)
+    
+    return render_template('year.html', year=year, data=sorted_films)
