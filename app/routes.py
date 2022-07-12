@@ -1,3 +1,4 @@
+from audioop import avg
 import json
 from flask import render_template, flash, redirect, session, url_for, jsonify
 from app import app
@@ -13,6 +14,7 @@ from app.database import query_user_films_from_year
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
+    print('username' not in session)
     if form.validate_on_submit():
         username = form.username.data
         session['username'] = username
@@ -36,12 +38,10 @@ def stats():
 
     if year_form.validate_on_submit() and year_form.year.data:
         year = year_form.year.data
-        session['year'] = year
-        return redirect(url_for('year'))
+        return redirect(url_for('year', year=year))
 
     if update_data_form.validate_on_submit():
         return redirect(url_for('loading'))
-
 
     return render_template('stats.html', num_pages=pages, username=username, avatar_url=avatar_url, form=update_data_form, year_form=year_form)
 
@@ -70,12 +70,25 @@ def update_data():
 
     return redirect(url_for('stats'))
 
-@app.route('/year', methods=['GET'])
-def year():
-    year = session['year']
+
+@app.route('/year/<year>', methods=['GET', 'POST'])
+def year(year):
+    year_form = FetchYearDataForm()
+    year = str(year)
     username = session['username']
     user_films_from_year = query_user_films_from_year(username, year)
     sorted_films = sorted(
         user_films_from_year, key=lambda x: x[2], reverse=True)
-    
-    return render_template('year.html', year=year, data=sorted_films)
+    nr_films = len(sorted_films)
+    ratings = [0] * 10
+    avg_rating = 0
+    for film in sorted_films:
+        ratings[film[2]-1] += 1
+        avg_rating += film[2]
+    avg_rating = round(avg_rating / nr_films, 2)
+
+    if year_form.validate_on_submit() and year_form.year.data:
+        year = year_form.year.data
+        return redirect(url_for('year', year=year))
+
+    return render_template('year.html', year=year, films=sorted_films, label=list(range(1, 11)), data=ratings, username=username, nr_films=len(sorted_films), avg_rating=avg_rating, year_form=year_form)

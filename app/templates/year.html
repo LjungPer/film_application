@@ -3,31 +3,91 @@
 <h1>Stats for year {{ year }}</h1>
 <body>
 
-<div style="width: 100%; overflow: hidden;">
-    <div id="Statistics" style="width: 600px; float: left; text-align:center;">
-        <table class="yearTable">
-            <tr class="yearRow">
-                <th class="yearColumn"></th>
-                <th class="yearColumn">Title</th>
-                <th class="yearColumn">Rating</th>
-            </tr>
-            {% for i in data %}
-            <tr class="yearRow">
-                <td class="yearColumn">
-                    <a href={{ i.3 }}>
-                        <img height="67" width="45" src={{ i.3 }}>
-                    </a>
-                </td>
-                <td class="yearColumn">
-                    {{ loop.index }}. {{ i.0 }}
-                </td>
-                <td class="yearColumn">{{ i.2 }}</td>
-            </tr>
-            {% endfor %}
-        </table>
-    </div>
-</div>
+    <p>User {{ username }} has logged {{ nr_films }} films in {{ year }} with an average rating of {{ avg_rating }}.</p>
 
+    <div style="width: 100%; overflow: hidden; display: table;">
+        <div id="Statistics" style="width: 30%; float: left; text-align:center; padding-right: 50px;">
+            <h2>Top films of the year</h2>
+            <table class="yearTable">
+                <tr class="yearRow">
+                    <th class="yearColumn"></th>
+                    <th class="yearColumn">Title</th>
+                    <th class="yearColumn">Rating</th>
+                </tr>
+                {% for i in films %}
+                <tr class="yearRow">
+                    <td class="yearColumn">
+                        <a href={{ i.3 }}>
+                            <img height="67" width="45" src={{ i.3 }}>
+                        </a>
+                    </td>
+                    <td class="yearColumn">
+                        {{ loop.index }}. {{ i.0 }}
+                    </td>
+                    <td class="yearColumn">{{ i.2 }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+        <div style="width: 60%; overflow: hidden; display: table;">
+            <div style="width: 50%; float: left; padding-top: 40px;">
+                <canvas id="myChart"></canvas>
+            </div>
+            <div id="Search" style="margin-left: 50%;"> 
+
+                <form action="" method="post" novalidate>
+                    {{ year_form.hidden_tag() }}
+                    <p>
+                        {{ year_form.year.label }}<br>
+                        {{ year_form.year(size=32) }}<br>
+                    </p>
+                    <p>{{ year_form.submit() }}</p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+<script>  
+
+    const data = {
+        labels: {{ label|tojson }},
+        datasets: [
+            {
+                data: {{ data|tojson }},
+                fill: false,
+                borderColor: 'rgb(255, 99, 132)',
+                backgroundColor: 'rgba(255, 99, 132, 0.5)', 
+                borderWidth: 2,
+                borderRadius: Number.MAX_VALUE,
+                borderSkipped: false, 
+            }
+        ]
+    };
+
+    const config = {
+        type: 'bar',
+        data: data,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: 'Rating distribution'
+                }
+            },
+
+        }
+    };
+</script>
+<script>
+  const myChart = new Chart(
+    document.getElementById('myChart'),
+    config
+  );
+</script>
 </body>
 
 

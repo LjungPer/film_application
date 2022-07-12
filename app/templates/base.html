@@ -93,10 +93,15 @@
         </style>
     </head>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <body>
         <div>
             Filmstats:
-            <a href="/login">Home</a>
+            <a href="/login" style="padding-right: 10px;">User</a> 
+            {% if 'username' in session %}
+            <a href="/stats">Stats</a>
+            <a id="user" style="float: right">Current user: {{ session['username'] }}</a>
+            {% endif %}
         </div>
         <hr>
         {% with messages = get_flashed_messages() %}
@@ -110,4 +115,8 @@
         {% endwith %}
         {% block content %}{% endblock %}
     </body>
+  <script>
+    let link = document.getElementById('user');
+    link.href = "https://letterboxd.com/" + {{ session['username']|tojson }} + "/";
+  </script>
 </html>

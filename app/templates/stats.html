@@ -14,6 +14,7 @@
 <div id="buttons">
     <button class="action_btn" onclick="topDirectorButton('biased')">Top directors</button>
     <button class="action_btn" onclick="topCountryButton('biased')">Top countries</button>
+    <button class="action_btn" onclick="topYearButton('biased')">Top years</button>
     <form action="" method="post" novalidate>
         {{ form.hidden_tag() }}
         <p>{{ form.submit() }}</p>
@@ -21,7 +22,7 @@
 </div>
 <div style="width: 100%; overflow: hidden;">
     <div id="Statistics" style="width: 600px; float: left; text-align:center;"></div>
-    <div style="margin-left: 620px;"> 
+    <div id="Search" style="margin-left: 620px;"> 
 
         <form action="" method="post" novalidate>
             {{ year_form.hidden_tag() }}
@@ -94,6 +95,9 @@
     }
     function topCountryButton(sorting_type) {
         fetchCategory('Country', sorting_type);
+    }
+    function topYearButton(sorting_type) {
+        fetchCategory('Year', sorting_type);
     }
 
 </script>
