@@ -2,19 +2,18 @@ from audioop import avg
 import json
 from flask import render_template, flash, redirect, session, url_for, jsonify
 from app import app
-from app.forms import LoginForm, UpdateDataForm, FetchYearDataForm
-from app.manager import update_db_with_new_films, set_up_user, update_user_info
+from app.forms import LoginForm, UpdateDataForm, FetchYearDataForm, ReusableForm
+from app.manager import update_db_with_new_films, set_up_user, update_user_info, get_ratings_from_films
 from app.user import update_user_statistics
 from app.fetch import get_top_category
 from app.models import User
-from app.database import query_user_films_from_year
+from app.database import query_user_films_from_year, query_user_years
 
 
 @app.route('/')
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
-    print('username' not in session)
     if form.validate_on_submit():
         username = form.username.data
         session['username'] = username
@@ -27,18 +26,28 @@ def login():
 @app.route('/stats', methods=['GET', 'POST'])
 def stats():
     update_data_form = UpdateDataForm()
-    year_form = FetchYearDataForm()
+    #year_form = FetchYearDataForm()
+    year_form = ReusableForm()
+
     username = session['username']
     u = User.query.get(username)
+    # options should be str so that empty choice option is valid
+    possible_names = query_user_years(username)
+    year_form.name.choices = [("", "")] + [(uuid, name)
+                                           for uuid, name in possible_names.items()]
     pages = u.pages
     avatar_url = u.avatar_url
     if pages == -1:
         flash('No user found. Try another username.')
         return redirect(url_for('login'))
 
-    if year_form.validate_on_submit() and year_form.year.data:
-        year = year_form.year.data
+    if year_form.validate_on_submit() and year_form.name.data:
+        year = year_form.name.data
         return redirect(url_for('year', year=year))
+
+    # if year_form.validate_on_submit() and year_form.name.data:
+    #    print(year_form.name.data)
+    #    return redirect(url_for('stats'))
 
     if update_data_form.validate_on_submit():
         return redirect(url_for('loading'))
@@ -73,22 +82,21 @@ def update_data():
 
 @app.route('/year/<year>', methods=['GET', 'POST'])
 def year(year):
-    year_form = FetchYearDataForm()
-    year = str(year)
     username = session['username']
-    user_films_from_year = query_user_films_from_year(username, year)
-    sorted_films = sorted(
-        user_films_from_year, key=lambda x: x[2], reverse=True)
-    nr_films = len(sorted_films)
-    ratings = [0] * 10
-    avg_rating = 0
-    for film in sorted_films:
-        ratings[film[2]-1] += 1
-        avg_rating += film[2]
-    avg_rating = round(avg_rating / nr_films, 2)
+    year_form = ReusableForm()
+    # options should be str so that empty choice option is valid
+    possible_names = query_user_years(username)
+    year_form.name.choices = [("", "")] + [(uuid, name)
+                                           for uuid, name in possible_names.items()]
+    user_films_from_year = query_user_films_from_year(
+        username, year, sort=True)
+    nr_films = len(user_films_from_year)
+    ratings, avg_rating = get_ratings_from_films(user_films_from_year)
 
-    if year_form.validate_on_submit() and year_form.year.data:
-        year = year_form.year.data
+    if year_form.validate_on_submit() and year_form.name.data:
+        year = year_form.name.data
         return redirect(url_for('year', year=year))
 
-    return render_template('year.html', year=year, films=sorted_films, label=list(range(1, 11)), data=ratings, username=username, nr_films=len(sorted_films), avg_rating=avg_rating, year_form=year_form)
+    return render_template('year.html', year=year, films=user_films_from_year,
+                           label=list(range(1, 11)), data=ratings, nr_films=nr_films,
+                           avg_rating=avg_rating, year_form=year_form)

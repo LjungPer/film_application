@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField
-from wtforms.validators import DataRequired
+from wtforms import StringField, SubmitField, SelectField
+from wtforms.validators import DataRequired, InputRequired
 
 
 class LoginForm(FlaskForm):
@@ -16,3 +16,10 @@ class UpdateDataForm(FlaskForm):
 class FetchYearDataForm(FlaskForm):
     year = StringField('Search year', validators=[DataRequired()])
     submit = SubmitField('Check')
+
+
+class ReusableForm(FlaskForm):
+    name = SelectField("Enter year",
+                        render_kw={'style': 'width: 150px'},
+                        validators=[DataRequired()])
+    submit = SubmitField('Search')

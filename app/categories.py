@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Union
 
 
 class Category:
@@ -29,16 +29,16 @@ class Category:
     def number_of_films(self) -> int:
         return len(self.films)
 
-    def append_film(self, film: Tuple[int, int]) -> None:
+    def append_film(self, film: Tuple[int, Union[int, str]]) -> None:
         """
         Append a film to list of related films.
 
         Argument film characterized by tuple of attributes.
-        film[0]: id(int), film[1]: rating(int).
+        film[0]: id(int), film[1]: rating(int | str).
 
         Parameters
         ----------
-        film : Tuple[int, int]
+        film : Tuple[int, int|str]
             Film to append.
         """
         self.films.append(film)
@@ -48,7 +48,7 @@ class Category:
         nr_rated_films = 0
         for film in self.films:
             rating = film[1]
-            if rating is not None:
+            if isinstance(rating, int):
                 tot_rating += rating
                 nr_rated_films += 1
         if nr_rated_films > 0:

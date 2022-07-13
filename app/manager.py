@@ -108,7 +108,12 @@ def convert_logged_films_to_tuples(logged_films):
 
     films_compact = []
     for film in logged_films:
-        tup = (int(film['letterboxd_id']), film['rating'])
+        id = int(film['letterboxd_id'])
+        if film['rating'] is not None:
+            rating = film['rating']
+        else:
+            rating = 'Not rated'
+        tup = (id, rating)
         films_compact.append(tup)
     return films_compact
 
@@ -146,3 +151,16 @@ def add_scraped_info(films, scrape_responses):
             tmdb_id = re.search('tv/(.*)/', tmp).group(1)  # type: ignore
             film['tmdb_id'] = tmdb_id
             film['tv'] = True
+
+
+def get_ratings_from_films(films):
+    rated_films_from_year = [film for film in films if isinstance(film[2], int)]
+    nr_rated_films = len(rated_films_from_year)
+    ratings = [0] * 10
+    avg_rating = 0
+    for film in rated_films_from_year:
+        ratings[film[2]-1] += 1
+        avg_rating += film[2]
+    avg_rating = round(avg_rating / nr_rated_films, 2)
+
+    return ratings, avg_rating

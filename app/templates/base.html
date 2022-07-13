@@ -94,6 +94,13 @@
     </head>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script
+      src="https://code.jquery.com/jquery-3.4.1.min.js"
+      integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+      crossorigin="anonymous"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.10/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.10/js/select2.min.js"></script>
+
     <body>
         <div>
             Filmstats:
@@ -101,6 +108,10 @@
             {% if 'username' in session %}
             <a href="/stats">Stats</a>
             <a id="user" style="float: right">Current user: {{ session['username'] }}</a>
+            <script>
+              let link = document.getElementById('user');
+              link.href = "https://letterboxd.com/" + {{ session['username']|tojson }} + "/";
+            </script>
             {% endif %}
         </div>
         <hr>
@@ -115,8 +126,4 @@
         {% endwith %}
         {% block content %}{% endblock %}
     </body>
-  <script>
-    let link = document.getElementById('user');
-    link.href = "https://letterboxd.com/" + {{ session['username']|tojson }} + "/";
-  </script>
 </html>

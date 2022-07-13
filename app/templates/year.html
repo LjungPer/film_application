@@ -3,9 +3,10 @@
 <h1>Stats for year {{ year }}</h1>
 <body>
 
-    <p>User {{ username }} has logged {{ nr_films }} films in {{ year }} with an average rating of {{ avg_rating }}.</p>
+    <p>User {{ session['username'] }} has logged {{ nr_films }} films in {{ year }} with an average rating of {{ avg_rating }}.</p>
 
     <div style="width: 100%; overflow: hidden; display: table;">
+
         <div id="Statistics" style="width: 30%; float: left; text-align:center; padding-right: 50px;">
             <h2>Top films of the year</h2>
             <table class="yearTable">
@@ -30,21 +31,40 @@
             </table>
         </div>
         <div style="width: 60%; overflow: hidden; display: table;">
+
             <div style="width: 50%; float: left; padding-top: 40px;">
                 <canvas id="myChart"></canvas>
             </div>
-            <div id="Search" style="margin-left: 50%;"> 
 
-                <form action="" method="post" novalidate>
-                    {{ year_form.hidden_tag() }}
-                    <p>
-                        {{ year_form.year.label }}<br>
-                        {{ year_form.year(size=32) }}<br>
-                    </p>
-                    <p>{{ year_form.submit() }}</p>
+            <div id="Search" style="margin-left: 50%;"> 
+                <form action="{{ url_for('stats') }}" method="POST" novalidate>
+                {{ year_form.hidden_tag() }}
+                    <table style="text-align:center;">
+                        <tr>
+                            <td>
+                                Search year
+                            </td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>{{ year_form.name }}</td>
+                            <td>{{ year_form.submit }}</td>
+                        </tr>
+                    </table>
                 </form>
+                <script>
+                $(document).ready(function() {
+                    $('#name').select2({  // init Select2 on form's name field
+                        placeholder: "{{ year_form.name.label.text }}",
+                        allowClear: true,
+                        "width": "style"
+                    });
+                });
+                </script>
             </div>
+
         </div>
+
     </div>
 
 <script>  
