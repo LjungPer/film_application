@@ -55,7 +55,11 @@ def add_movie_and_director_to_db(film):
     ''' This part adds the film to the database. '''
     tmdb_film = tmdb.Movies(film['tmdb_id'])
     tmdb_film_info = tmdb_film.info()
-    poster_url = 'https://image.tmdb.org/t/p/original' + tmdb_film_info['poster_path']
+    poster_path = tmdb_film_info['poster_path']
+    if poster_path is not None:
+        poster_url = 'https://image.tmdb.org/t/p/original' + tmdb_film_info['poster_path']
+    else:
+        poster_url = 'https://i.kym-cdn.com/photos/images/original/001/590/955/19d.png'
     db_film = Film(tmdb_id=int(film['tmdb_id']), title=tmdb_film_info['title'],
                    letterboxd_id=int(film['letterboxd_id']), poster_url=poster_url)
     db.session.add(db_film)

@@ -14,8 +14,7 @@ class UpdateDataForm(FlaskForm):
 
 
 class FetchYearDataForm(FlaskForm):
-    year = StringField('Search year', validators=[DataRequired()])
-    submit = SubmitField('Check')
+    submit = SubmitField('Year data')
 
 
 class ReusableForm(FlaskForm):

@@ -164,3 +164,24 @@ def get_ratings_from_films(films):
     avg_rating = round(avg_rating / nr_rated_films, 2)
 
     return ratings, avg_rating
+
+def get_data_for_all_years(username):
+    user_years = query_user_attr(username, 'Year')
+    user_years = sorted(user_years, key=lambda x: int(x[0]), reverse=True)
+    first_year = int(user_years[-1][0])
+    last_year = int(user_years[0][0])
+    all_years = list(range(first_year, last_year+1))
+    yearly_data = {int(year[0]): (year[2], year[3], year[4]) for year in user_years}
+    avg = []
+    bias = []
+    nr_films = []
+    for year in all_years:
+        if year in yearly_data:
+            avg.append(yearly_data[year][0])
+            bias.append(yearly_data[year][1])
+            nr_films.append(yearly_data[year][2])
+        else:
+            avg.append(0)
+            bias.append(0)
+            nr_films.append(0)
+    return all_years, avg, bias, nr_films

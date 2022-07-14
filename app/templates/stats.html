@@ -1,55 +1,36 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Stats for user {{ username }}</h1>
+<script>
+    let a = document.getElementsByClassName("active");
+    if (a.length > 0) {
+        a.classList.remove("active");
+    }
+    let p = document.getElementById("home");
+    p.className = "active";
+</script>
+<h1>Stats for user {{ session['username'] }}</h1>
 <div>
-    <p>User {{ username }} has {{ num_pages }} pages of ratings.</p>
+    <p>User {{ session['username'] }} has {{ session['pages'] }} pages of ratings.</p>
 </div>
-<a href="https://letterboxd.com/kattihatt2/" class="circle">
-    <img height="128" width="128" src={{ avatar_url }}>
+<a id="avatar" class="circle">
+    <img height="128" width="128" src={{ session['avatar_url'] }}>
 </a>
+
+<script>
+    let tmp = document.getElementById('avatar');
+    tmp.href = "https://letterboxd.com/" + {{ session['username']|tojson }} + "/";
+</script>
+
 <div>
     <p>A simple app where you provide your letterboxd username, and we provide you with some data.</p>
 </div>
 
-<div id="buttons">
-    <button class="action_btn" onclick="topDirectorButton('biased')">Top directors</button>
-    <button class="action_btn" onclick="topCountryButton('biased')">Top countries</button>
-    <button class="action_btn" onclick="topYearButton('biased')">Top years</button>
-    <form action="" method="post" novalidate>
-        {{ form.hidden_tag() }}
-        <p>{{ form.submit() }}</p>
-    </form>
+
+<div id="buttons" style="margin-top: 30px;">
+    <a href="{{ url_for('loading') }}" class="buttonTest" rel="nofollow">Update data</a>
 </div>
 <div style="width: 100%; overflow: hidden; display: table;">
     <div id="Statistics" style="width: 45%; float: left; text-align:center; padding-left: 5%;"></div>
-    <div id="Search" style="width: 45%; float: right;"> 
-        <form action="{{ url_for('stats') }}" method="POST" novalidate>
-        {{ year_form.hidden_tag() }}
-            <table style="text-align:center;">
-                <tr>
-                    <td>
-                        Search year
-                    </td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>{{ year_form.name }}</td>
-                    <td>{{ year_form.submit }}</td>
-                </tr>
-            </table>
-        </form>
-
-
-        <script>
-        $(document).ready(function() {
-            $('#name').select2({  // init Select2 on form's name field
-                placeholder: "{{ year_form.name.label.text }}",
-                allowClear: true,
-                "width": "style"
-            });
-        });
-        </script>
-    </div>
 </div>
 
 <script>
@@ -96,7 +77,7 @@
         $.ajax({
             type: "GET",
             url: "/categories/" + title + '/' + sorting_type
-        }).done(function (jsonData, labels, data) {
+        }).done(function (jsonData) {
             console.log("success ");
             var table = createCategoryTableFromJson(jsonData, title);
             var div = document.getElementById('Statistics');
@@ -112,9 +93,6 @@
     }
     function topCountryButton(sorting_type) {
         fetchCategory('Country', sorting_type);
-    }
-    function topYearButton(sorting_type) {
-        fetchCategory('Year', sorting_type);
     }
 
 </script>
