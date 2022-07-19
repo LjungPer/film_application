@@ -6,8 +6,7 @@ from app.forms import LoginForm, UpdateDataForm, FetchYearDataForm, ReusableForm
 from app.manager import update_db_with_new_films, set_up_user, update_user_info, get_ratings_from_films, get_data_for_all_years
 from app.user import update_user_statistics
 from app.fetch import get_top_category
-from app.models import User
-from app.database import query_user_films_from_year, query_user_years
+from app.database import query_user_films_from_year, query_user_years, query_user
 
 
 @app.route('/')
@@ -18,7 +17,7 @@ def login():
         username = form.username.data
         session['username'] = username
         set_up_user(username)
-        u = User.query.get(username)
+        u = query_user(username)
         session['pages'] = u.pages
         session['avatar_url'] = u.avatar_url
 
@@ -32,6 +31,8 @@ def stats():
     update_data_form = UpdateDataForm()
 
     if session['pages'] == -1:
+        session.pop('username', None)
+        session.pop('pages', None)
         flash('No user found. Try another username.')
         return redirect(url_for('login'))
 
@@ -45,7 +46,8 @@ def stats():
 def categories(category_type, sorting_type):
 
     username = session['username']
-    top_category_biased = get_top_category(username, str(category_type), sorting_type=str(sorting_type))
+    top_category_biased = get_top_category(username, str(
+        category_type), sorting_type=str(sorting_type))
     return jsonify(top_category_biased)
 
 
@@ -74,10 +76,15 @@ def years():
     possible_names = query_user_years(username)
     year_form.name.choices = [("", "")] + [(uuid, name)
                                            for uuid, name in possible_names.items()]
+
     if year_form.validate_on_submit() and year_form.name.data:
         year = year_form.name.data
         return redirect(url_for('year', year=year))
-    return render_template('years.html', years=all_years, avg=avg, bias=bias, nr_films=nr_films, year_form=year_form)
+
+    return render_template('years.html', years=all_years, avg=avg, bias=bias, 
+                            nr_films=nr_films, year_form=year_form,
+                            most_films=all_years[nr_films.index(max(nr_films))], 
+                            avg_year=all_years[avg.index(max(avg))])
 
 
 @app.route('/year/<year>', methods=['GET', 'POST'])

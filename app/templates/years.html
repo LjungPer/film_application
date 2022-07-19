@@ -1,45 +1,49 @@
 {% extends "base.html" %}
 {% block content %}
-<script>
-    let a = document.getElementsByClassName("active");
-    if (a.length > 0) {
-        a.classList.remove("active");
-    }
-    let p = document.getElementById("years");
-    p.className = "active";
-</script>
+
 <h1>Year statistics</h1>
+
 <div style="width: 100%;">
+
     <div style="width: 49%; float: left;">
+
         <div style="float: right;">
             <a href="https://letterboxd.com/kattihatt2/" class="circle">
                 <img height="128" width="128" src={{ session['avatar_url'] }}>
             </a>
         </div>
+
     </div>
+
     <div style="width: 49%; float: right; text-align: left;">
-        <h1 class="title-1">{{ session['username'] }}</h1>
-        <div style="text-align: left; margin-left: 30px; margin-top: 40px;">
-            <b>Most films:</b> 2021 with 122 films.<br>
-            <b>Best average:</b> 1957 with 8.00.
+        <h3>{{ session['username'] }}</h3>
+
+        <div style="text-align: left; margin-top: 40px;">
+            <p class="para"><b>Most films:</b> {{ most_films|tojson }} with {{ nr_films|max|tojson }} films.</p>
+            <p class="para"><b>Best average:</b> {{ avg_year|tojson }} with {{ avg|max|tojson }}.</p>
         </div>
+
     </div>
+
 </div>
+
+
 <body>
+
     <div style="width: 80%; display: table; margin: 0 auto;">
 
         <div style="width: 50%; padding: 10px; float: left;">
 
-            <div style="padding: 3%;">
-                <canvas id="avgPerYear"></canvas>
+            <div class="select" style="width: 28%; margin: 0 auto;">
+            <select id="sorting" onchange="changeChart(this.value);">
+                <option value="avg">Average</option>
+                <option value="bias">Bias</option>
+                <option value="nr_films">Number of films</option>
+            </select>
             </div>
-            <br>
+
             <div style="padding: 3%;">
-                <canvas id="biasPerYear"></canvas>
-            </div>
-            <br>
-            <div style="padding: 3%;">
-                <canvas id="nrfilmsPerYear"></canvas>
+                <canvas id="yearChart"></canvas>
             </div>
 
         </div>
@@ -64,7 +68,7 @@
 
             <script>
             $(document).ready(function() {
-                $('#name').select2({  // init Select2 on form's name field
+                $('#name').select2({
                     placeholder: "{{ year_form.name.label.text }}",
                     allowClear: true,
                     "width": "style"
@@ -72,67 +76,22 @@
             });
             </script>
 
-                <table id="myTable" class="topTable">
-                    <tr class="topRow">
-                        <th id="year" class="topColumn">Year</th>
-                        <th id="average" style="opacity: 0.6;" class="topColumn"><a onclick="fetchCategory('Year', 'average')"><b>Average</b></a></th>
-                        <th id="biased" style="opacity: 0.6;" class="topColumn"><a onclick="fetchCategory('Year', 'biased')"><b>Biased</b></a></th>
-                        <th id="films" style="opacity: 0.6;" class="topColumn"><a onclick="fetchCategory('Year', 'films')"><b>Films</b></a></th>
-                    </tr>
-                    <tbody id="testBody"></tbody>
-                </table>
-
-                <script>
-                    
-                    function loadTableData(data) {
-                        const table = document.getElementById("testBody");
-                        for (var i = 0; i < data.length; i++) {
-                            var tr = table.insertRow();
-                            tr.className = 'topRow';
-
-                            for (var j = 0; j < 4; j++) {
-                                var cell = tr.insertCell();
-                                cell.className = 'topColumn';
-                                if (j==1 || j == 2) {
-                                    cell.innerHTML = Number.parseFloat(data[i][j]).toFixed(2); // 0: name, 1: average rating, 2: biased rating, 3: nr films 
-                                }
-                                else {
-                                    if (j == 0) {
-                                        cell.innerHTML = (i+1).toString() + ".  " + data[i][j];
-                                    }
-                                    else {
-                                        cell.innerHTML = data[i][j]; // 0: name, 1: average rating, 2: biased rating, 3: nr films 
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    var fetchCategory = function (title, sorting_type) {
-                        $.ajax({
-                            type: "GET",
-                            url: "/categories/" + title + '/' + sorting_type
-                        }).done(function (jsonData) {
-                            var elements = document.getElementsByClassName("topColumn");
-                            for (var i = 0; i < elements.length; i++) {
-                                elements.item(i).style.opacity = 0.6;
-                            };
-                            var element = document.getElementById("year");
-                            element.style.opacity = 1;
-                            var element = document.getElementById(sorting_type);
-                            element.style.opacity = 1;
-                            document.getElementById('testBody').innerHTML = '';
-                            loadTableData(jsonData);
-                        });
-                    }
-
-                    fetchCategory('Year', 'biased');
-
-                </script>
+            <table id="myTable" class="topTable">
+                <tr class="topRow">
+                    <th id="year" class="topColumn">Year</th>
+                    <th id="average" style="opacity: 0.6;" class="topColumn"><a onclick="fetchCategory('Year', 'average')"><b>Average</b></a></th>
+                    <th id="biased" style="opacity: 0.6;" class="topColumn"><a onclick="fetchCategory('Year', 'biased')"><b>Biased</b></a></th>
+                    <th id="films" style="opacity: 0.6;" class="topColumn"><a onclick="fetchCategory('Year', 'films')"><b>Films</b></a></th>
+                </tr>
+                <tbody id="testBody"></tbody>
+            </table>
+            <script src="{{ url_for('static', filename='fetchCategory.js') }}"></script>
+            <script>fetchCategory('Year', 'biased');</script>
 
         </div>
 
     </div>
+
     
 <script>  
 
@@ -144,8 +103,8 @@
                 {
                     data: dataInput,
                     fill: false,
-                    borderColor: 'rgb(255, 99, 132)',
-                    backgroundColor: 'rgba(255, 99, 132, 0.5)', 
+                    borderColor: 'rgb(4, 170, 109)',
+                    backgroundColor: 'rgba(4, 170, 109, 0.5)', 
                     borderWidth: 2,
                     borderRadius: Number.MAX_VALUE,
                     borderSkipped: false, 
@@ -164,14 +123,29 @@
                 },
                 title: {
                     display: true,
-                    text: titleInput
+                    text: titleInput,
+                    font: {
+                        size: 18
+                    }
                 }
             },
             scales: {
                 y: {
                     beginAtZero: true,
                     min: 0,
-                    max: maxInput + 1
+                    max: maxInput,
+                    ticks: {
+                        font: {
+                            size: 16
+                        }
+                    }
+                },
+                x: {
+                    ticks: {
+                        font: {
+                            size: 16
+                        }
+                    }
                 }
             }
 
@@ -183,10 +157,27 @@
 </script>
 
 <script>
-  const avgChart = new Chart(document.getElementById('avgPerYear'), yearChartConfig({{ avg|tojson }}, 'Average rating', 9));
-  const biasChart = new Chart(document.getElementById('biasPerYear'), yearChartConfig({{ bias|tojson }}, 'Bias rating', 9));
-  const nrFilmsChart = new Chart(document.getElementById('nrfilmsPerYear'), yearChartConfig({{ nr_films|tojson }}, 'Number of films', {{ nr_films|max|tojson }}));
+    let chart = new Chart(document.getElementById('yearChart'), yearChartConfig({{ avg|tojson }}, 'Average rating', 10));
+    function changeChart(value) {
+        chart.destroy();
+        if (value == 'avg') {
+            data = {{ avg|tojson }};
+            title = 'Average rating';
+            max = 10;
+        } else if (value == 'bias') {
+            data = {{ bias|tojson }};
+            title = 'Bias rating';
+            max = 10;
+        } else {
+            data = {{ nr_films|tojson }};
+            title = 'Number of films';
+            max = {{ nr_films|max|tojson }} + 1;
+        };
+        chart = new Chart(document.getElementById('yearChart'), yearChartConfig(data, title, max));
+    }
 </script>
+
+
 
 </body>
 {% endblock %}

@@ -57,7 +57,8 @@ def add_movie_and_director_to_db(film):
     tmdb_film_info = tmdb_film.info()
     poster_path = tmdb_film_info['poster_path']
     if poster_path is not None:
-        poster_url = 'https://image.tmdb.org/t/p/original' + tmdb_film_info['poster_path']
+        poster_url = 'https://image.tmdb.org/t/p/original' + \
+            tmdb_film_info['poster_path']
     else:
         poster_url = 'https://i.kym-cdn.com/photos/images/original/001/590/955/19d.png'
     db_film = Film(tmdb_id=int(film['tmdb_id']), title=tmdb_film_info['title'],
@@ -183,8 +184,8 @@ def query_category_of_all_db_films(category_type: str) -> dict:
     return db_category_of_db_film
 
 
-def user_in_db(username):
-    return User.query.get(username) is not None
+def query_user(username):
+    return User.query.get(username)
 
 
 def query_user_attr(username: str, attr_type: str) -> List[Tuple]:
@@ -221,7 +222,7 @@ def get_primary_key(category: DatabaseType) -> Union[int, str]:
     return inspect(category).identity[0]
 
 
-def query_user_films_from_year(username: str, year: str, sort: bool=False) -> List[Tuple[str, int, int]]:
+def query_user_films_from_year(username: str, year: str, sort: bool = False) -> List[Tuple[str, int, int]]:
     u = User.query.get(username)
     y = Year.query.get(year)
 
@@ -236,7 +237,8 @@ def query_user_films_from_year(username: str, year: str, sort: bool=False) -> Li
             tmp = (db_film.title, film[0], film[1], db_film.poster_url)
             user_films_this_year.append(tmp)
     if sort:
-        user_films_this_year = sorted(user_films_this_year, key=lambda x: (isinstance(x[2], int), x[2]), reverse=True)
+        user_films_this_year = sorted(user_films_this_year, key=lambda x: (
+            isinstance(x[2], int), x[2]), reverse=True)
 
     return user_films_this_year
 
@@ -249,7 +251,10 @@ def query_user_years(username: str) -> dict:
     else:
         years = {}
     return years
-        
+
+
+def user_is_in_db(username: str) -> bool:
+    return User.query.get(username) is not None
 
 
 def director_is_in_db(director: dict) -> bool:

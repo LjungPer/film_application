@@ -61,33 +61,3 @@ class Category:
         biased_factor = 1 - 0.8 / nr_films
 
         return self.average_rating * biased_factor
-
-
-class DirectorStats(Category):
-    def __init__(self, name: str) -> None:
-        super().__init__(name)
-
-
-class CountryStats(Category):
-    def __init__(self, name: str) -> None:
-        super().__init__(name)
-
-
-class YearStats(Category):
-    def __init__(self, name: str) -> None:
-        super().__init__(name)
-
-
-class ActorStats(Category):
-    def __init__(self, name: str) -> None:
-        super().__init__(name)
-
-
-class ActressStats(Category):
-    def __init__(self, name: str) -> None:
-        super().__init__(name)
-
-
-class GenreStats(Category):
-    def __init__(self, name: str) -> None:
-        super().__init__(name)

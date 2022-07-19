@@ -1,17 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
-<script>
-    let a = document.getElementsByClassName("active");
-    if (a.length > 0) {
-        a.classList.remove("active");
-    }
-    let p = document.getElementById("home");
-    p.className = "active";
-</script>
+
 <h1>Stats for user {{ session['username'] }}</h1>
+
 <div>
     <p>User {{ session['username'] }} has {{ session['pages'] }} pages of ratings.</p>
 </div>
+
 <a id="avatar" class="circle">
     <img height="128" width="128" src={{ session['avatar_url'] }}>
 </a>
@@ -25,76 +20,8 @@
     <p>A simple app where you provide your letterboxd username, and we provide you with some data.</p>
 </div>
 
-
-<div id="buttons" style="margin-top: 30px;">
+<div style="margin-top: 30px;">
     <a href="{{ url_for('loading') }}" class="buttonTest" rel="nofollow">Update data</a>
 </div>
-<div style="width: 100%; overflow: hidden; display: table;">
-    <div id="Statistics" style="width: 45%; float: left; text-align:center; padding-left: 5%;"></div>
-</div>
-
-<script>
-
-    // function to create table html from json
-    var createCategoryTableFromJson = function (data, title) {
-        var table = document.createElement("table");
-
-
-        const titles = [title, "Average", "Biased", "Films"];
-        var tr = table.insertRow();
-        for (var k = 0; k < titles.length; k++) {
-            var cell = tr.insertCell();
-            if (k == 0) {
-                cell.innerHTML = titles[k];
-                cell.style.fontWeight = 'bold';
-            }
-            else {
-                var link = document.createElement("a");
-                let arg = titles[k].toLowerCase();
-                link.setAttribute('onclick', `return top` + title + `Button("${arg}")`);
-                var linkText = document.createTextNode(titles[k]);
-                link.appendChild(linkText);
-                link.style.fontWeight = 'bold';
-                cell.appendChild(link);
-            }
-        }
-
-        for (var i = 0; i < data.length; i++) {
-            var tr = table.insertRow();
-
-            for (var j = 0; j < titles.length; j++) {
-                var cell = tr.insertCell();
-                cell.innerHTML = data[i][j]; // 0: name, 1: average rating, 2: biased rating, 3: nr films 
-            }
-        }
-
-        table.className = "aClassName";
-        return table;
-    }
-
-    var fetchCategory = function (title, sorting_type) {
-        console.log("fetching directors data");
-        $.ajax({
-            type: "GET",
-            url: "/categories/" + title + '/' + sorting_type
-        }).done(function (jsonData) {
-            console.log("success ");
-            var table = createCategoryTableFromJson(jsonData, title);
-            var div = document.getElementById('Statistics');
-            div.innerHTML = "";
-            div.appendChild(table);
-        }).fail(function () {
-            console.log("failed")
-        });
-    }
-
-    function topDirectorButton(sorting_type) {
-        fetchCategory('Director', sorting_type);
-    }
-    function topCountryButton(sorting_type) {
-        fetchCategory('Country', sorting_type);
-    }
-
-</script>
 
 {% endblock %}

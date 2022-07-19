@@ -1,6 +1,6 @@
 import re
 from bs4 import BeautifulSoup, SoupStrainer
-from app.database import extract_films_not_in_db, add_films_to_db, query_user_attr, user_in_db, add_user_to_db, update_db_user
+from app.database import extract_films_not_in_db, add_films_to_db, query_user_attr, user_is_in_db, add_user_to_db, update_db_user
 from app.scraping import scrape_letterboxd_urls_of_films, scrape_pages_of_user_films_by_date, get_page_count, get_user_avatar_src
 import asyncio
 from app.decorators import timed
@@ -9,7 +9,7 @@ from typing import List
 
 def set_up_user(username):
 
-    if not user_in_db(username):
+    if not user_is_in_db(username):
         pages, avatar_url, logged_films = get_user_info(username)
         logged_films_compact = convert_logged_films_to_tuples(logged_films)
         add_user_to_db(username, logged_films_compact, pages, avatar_url)
@@ -154,7 +154,8 @@ def add_scraped_info(films, scrape_responses):
 
 
 def get_ratings_from_films(films):
-    rated_films_from_year = [film for film in films if isinstance(film[2], int)]
+    rated_films_from_year = [
+        film for film in films if isinstance(film[2], int)]
     nr_rated_films = len(rated_films_from_year)
     ratings = [0] * 10
     avg_rating = 0
@@ -165,13 +166,15 @@ def get_ratings_from_films(films):
 
     return ratings, avg_rating
 
+
 def get_data_for_all_years(username):
     user_years = query_user_attr(username, 'Year')
     user_years = sorted(user_years, key=lambda x: int(x[0]), reverse=True)
     first_year = int(user_years[-1][0])
     last_year = int(user_years[0][0])
     all_years = list(range(first_year, last_year+1))
-    yearly_data = {int(year[0]): (year[2], year[3], year[4]) for year in user_years}
+    yearly_data = {int(year[0]): (year[2], year[3], year[4])
+                   for year in user_years}
     avg = []
     bias = []
     nr_films = []

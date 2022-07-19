@@ -1,173 +1,9 @@
 <html>
     <head>
+      <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
       {{ JSGlue.include() }}
-        <title>{{ title }}</title>
-        <style>
-            body {
-              background:rgba(255,255,240,0.8);
-                font: 100 14px sans-serif;
-                color: #000;
-              text-shadow: 0 1px 1px rgba(255,255,255,0.1);
-                text-align: center;
-            }
-            ::-moz-selection {
-              background: rgba(0,0,0,0.1);
-            }
-            ::selection {
-              background: rgba(0,0,0,0.1);
-            }
-            h1 {
-              font-weight: 100;
-              font-size: 2.7em;
-            }
-            h3 {
-              color: #111222;
-              font-size: 1.6em;
-            }
-            a {
-              color: RoyalBlue;
-              font-weight: normal;
-              text-decoration: none;
-            }
-            a:hover {
-              color: CornflowerBlue;
-            }
-
-            /* Circle Avatar Styles */
-
-            .circle {
-                line-height: 0;		/* remove line-height */
-                display: inline-block;	/* circle wraps image */
-                margin: 5px;
-              border: 4px solid rgba(200,200,200,0.4);
-                border-radius: 50%;	/* relative value */
-                /*box-shadow: 0px 0px 5px rgba(0,0,0,0.4);*/
-                transition: linear 0.25s;
-              height: 128px;
-              width: 128px;
-            }
-            .circle img {
-                border-radius: 50%;	/* relative value for
-                               adjustable image size */
-            }
-            .circle:hover {
-                transition: ease-out 0.2s;
-              border: 4px solid rgba(0,0,0,0.2);
-              -webkit-transition: ease-out 0.2s;
-            }
-            a.circle {
-              color: transparent;
-            } /* IE fix: removes blue border */
-
-
-            /* Button Settings */
-            .buttons {
-                width: 200px;
-                margin: 0 auto;
-                display: inline;
-            }
-
-            .action_btn {
-                width: 200px;
-                margin: 0 auto;
-                display: inline;
-            }
-            
-            .aClassName {
-                text-align:center;
-            }
-
-            .yearTable {
-                font-family: arial, sans-serif;
-                border-collapse: collapse;
-                width: 100%;
-              }
-            .yearColumn {
-              border: 1px solid #dddddd;
-              text-align: left;
-              padding: 8px;
-            }
-            .yearRow:nth-child(even) {
-              background-color: #dddddd;
-            }
-
-            .topTable {
-                font-family: arial, sans-serif;
-                border-collapse: collapse;
-                width: 100%;
-                margin: 0 auto;
-              }
-            .topColumn {
-              border: 1px solid #dddddd;
-              text-align: center;
-              padding: 8px;
-            }
-            .topRow:nth-child(even) {
-              background-color: #dddddd;
-            }
-
-            .title-1 {
-              -moz-binding: url(../js/ellipsis.11b2da62.xml#ellipsis);
-              display: inline-block;
-              font-weight: normal;
-              font-size: 1.69230769rem;
-              line-height: 1;
-              margin: 0 .38461538rem 0 0;
-              max-width: 450px;
-              overflow: hidden;
-              padding: 3px 0;
-              text-overflow: ellipsis;
-              vertical-align: middle;
-              white-space: nowrap;
-            }
-
-            .buttonTest {
-              text-align: center;
-              color: white;
-              padding: 14px 16px;
-              text-decoration: none;
-              font-size: 17px;
-              border-radius: 8px;
-              background-color: #04AA6D;
-              opacity: 0.8;
-            }
-
-            .buttonTest:hover {
-              opacity: 1;
-              color: white;
-            }
-
-            .topnav {
-              overflow: hidden;
-            }
-
-            /* Style the links inside the navigation bar */
-            .topnav a {
-              float: left;
-              text-align: center;
-              color: #000;
-              padding: 14px 16px;
-              text-decoration: none;
-              font-size: 17px;
-              border-radius: 8px;
-            }
-
-            /* Change the color of links on hover */
-            .topnav a:hover {
-              background-color: #ddd;
-              color: black;
-            }
-
-            /* Add a color to the active/current link */
-            .topnav a.active {
-              background-color: #04AA6D;
-              color: white;
-            }
-
-
-        </style>
-
     </head>
+    
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script
@@ -183,7 +19,7 @@
         <div id="navBar" class="topnav" style="width: 50%; float: left;">
         {% if 'username' in session %}
           <a id="login" href="/login">New user</a>
-          <a id="home" href="/stats">Home</a>
+          <a id="stats" href="/stats">Home</a>
           <a id="years" href="/years">Year</a>
         {% endif %}
         </div>
@@ -199,17 +35,10 @@
         </div>
 
       </div>
+      
+      <script src="{{ url_for('static', filename='navbar.js') }}"></script>
 
-      <hr>
-      {% with messages = get_flashed_messages() %}
-      {% if messages %}
-      <ul>
-          {% for message in messages %}
-          <li>{{ message }}</li>
-          {% endfor %}
-      </ul>
-      {% endif %}
-      {% endwith %}
+      
       {% block content %}{% endblock %}
     </body>
 </html>

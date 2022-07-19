@@ -1,13 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-      <script>
-        let a = document.getElementsByClassName("active");
-        if (a.length > 0) {
-            a.classList.remove("active");
-        }
-        let p = document.getElementById("login");
-        p.className = "active";
-      </script>
+
     <h1>Sign In</h1>
     <form action="{{ url_for('login') }}" method="post" novalidate>
         {{ form.hidden_tag() }}
@@ -29,5 +22,6 @@
             </ul>
         {% endif %}
     {% endwith %}
+
 
 {% endblock %}
