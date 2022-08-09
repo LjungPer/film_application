@@ -188,3 +188,11 @@ def get_data_for_all_years(username):
             bias.append(0)
             nr_films.append(0)
     return all_years, avg, bias, nr_films
+
+def get_data_for_all_directors(username):
+    user_directors = query_user_attr(username, 'Director')
+    avg = sorted(user_directors, key=lambda x: float(x[2]), reverse=True)
+    bias = sorted(user_directors, key=lambda x: float(x[3]), reverse=True)
+    nr_films = sorted(user_directors, key=lambda x: int(x[4]), reverse=True)
+            
+    return avg, bias, nr_films
