@@ -253,6 +253,23 @@ def query_user_years(username: str) -> dict:
     return years
 
 
+def query_user_directors(username: str) -> dict:
+    u = User.query.get(username)
+    if u.director is not None:
+        sorted_directors = sorted(u.director, key=lambda x: x[1])
+        directors = {director[0]: director[1] for director in sorted_directors}
+    else:
+        directors = {}
+    return directors
+
+
+def query_user_director(username: str, id: int) -> Tuple:
+    all_directors = query_user_attr(username, 'Director')
+    director = [director for director in all_directors if director[0] == int(id)]
+    return director[0]
+
+
+
 def user_is_in_db(username: str) -> bool:
     return User.query.get(username) is not None
 

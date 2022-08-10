@@ -17,8 +17,15 @@ class FetchYearDataForm(FlaskForm):
     submit = SubmitField('Year data')
 
 
-class ReusableForm(FlaskForm):
+class YearSearchForm(FlaskForm):
     name = SelectField("Enter year",
+                        render_kw={'style': 'width: 150px'},
+                        validators=[DataRequired()])
+    submit = SubmitField('Search')
+
+
+class NameSearchForm(FlaskForm):
+    name = SelectField("Enter name",
                         render_kw={'style': 'width: 150px'},
                         validators=[DataRequired()])
     submit = SubmitField('Search')

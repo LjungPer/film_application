@@ -2,11 +2,11 @@ from audioop import avg
 import json
 from flask import render_template, flash, redirect, session, url_for, jsonify
 from app import app
-from app.forms import LoginForm, UpdateDataForm, FetchYearDataForm, ReusableForm
+from app.forms import LoginForm, UpdateDataForm, FetchYearDataForm, YearSearchForm, NameSearchForm
 from app.manager import get_data_for_all_directors, update_db_with_new_films, set_up_user, update_user_info, get_ratings_from_films, get_data_for_all_years
 from app.user import update_user_statistics
 from app.fetch import get_top_category
-from app.database import query_user_films_from_year, query_user_years, query_user
+from app.database import query_user_films_from_year, query_user_years, query_user, query_user_directors, query_user_director
 
 
 @app.route('/')
@@ -71,7 +71,7 @@ def update_data():
 def years():
     username = session['username']
     all_years, avg, bias, nr_films = get_data_for_all_years(username)
-    year_form = ReusableForm()
+    year_form = YearSearchForm()
     # options should be str so that empty choice option is valid
     possible_names = query_user_years(username)
     year_form.name.choices = [("", "")] + [(uuid, name)
@@ -90,7 +90,7 @@ def years():
 @app.route('/year/<year>', methods=['GET', 'POST'])
 def year(year):
     username = session['username']
-    year_form = ReusableForm()
+    year_form = YearSearchForm()
     # options should be str so that empty choice option is valid
     possible_names = query_user_years(username)
     year_form.name.choices = [("", "")] + [(uuid, name)
@@ -113,15 +113,15 @@ def year(year):
 def directors():
     username = session['username']
     avg, bias, nr_films = get_data_for_all_directors(username)
-    year_form = ReusableForm()
+    director_form = NameSearchForm()
     # options should be str so that empty choice option is valid
-    possible_names = query_user_years(username)
-    year_form.name.choices = [("", "")] + [(uuid, name)
+    possible_names = query_user_directors(username)
+    director_form.name.choices = [("", "")] + [(uuid, name)
                                            for uuid, name in possible_names.items()]
 
-    if year_form.validate_on_submit() and year_form.name.data:
-        year = year_form.name.data
-        return redirect(url_for('year', year=year))
+    if director_form.validate_on_submit() and director_form.name.data:
+        director_id = director_form.name.data
+        return redirect(url_for('director', id=director_id))
 
     avg_labels = [tmp[1] for tmp in avg]
     avg_scores = [tmp[2] for tmp in avg]
@@ -130,6 +130,13 @@ def directors():
     nr_films_labels = [tmp[1] for tmp in nr_films]
     nr_films_scores = [tmp[4] for tmp in nr_films]
     return render_template('directors.html', avg=avg_scores, avg_labels=avg_labels, bias=bias_scores, bias_labels=bias_labels, 
-                            nr_films=nr_films_scores, nr_films_labels=nr_films_labels, year_form=year_form)
+                            nr_films=nr_films_scores, nr_films_labels=nr_films_labels, year_form=director_form)
 
-    #return render_template('directors.html', year_form=year_form)
+
+
+@app.route('/director/<id>', methods=['GET', 'POST'])
+def director(id):
+    username = session['username']
+    director = query_user_director(username, id)
+
+    return render_template('director.html', director=director[1])

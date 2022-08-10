@@ -44,6 +44,32 @@
 
         <div style="width: 30%; padding: 1%; float: right;">
 
+            <form action="{{ url_for('directors') }}" method="POST" novalidate>
+            {{ year_form.hidden_tag() }}
+                <table style="text-align:center; margin: 0 auto;">
+                    <tr>
+                        <td>
+                            Search director
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>{{ year_form.name }}</td>
+                        <td>{{ year_form.submit }}</td>
+                    </tr>
+                </table>
+            </form>
+
+            <script>
+            $(document).ready(function() {
+                $('#name').select2({
+                    placeholder: "{{ year_form.name.label.text }}",
+                    allowClear: true,
+                    "width": "style"
+                });
+            });
+            </script>
+
             <table id="myTable" class="topTable">
                 <tr class="topRow">
                     <th id="year" class="topColumn">Director</th>
