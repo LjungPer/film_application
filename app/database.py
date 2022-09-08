@@ -5,7 +5,7 @@ from app.decorators import timed
 from sqlalchemy.inspection import inspect
 from typing import Union, List, Tuple, Set
 
-DatabaseType = Union[Director, Country, Year, Actor, Actress, Genre]
+DatabaseType = Union[Director, Country, Year, Actor, Actress, Genre, Language]
 
 
 @timed
@@ -98,7 +98,7 @@ def add_movie_and_director_to_db(film):
 
     ''' This part adds actor to the database '''
     cast = tmdb_film.credits()['cast']
-    nr_actors = max(len(cast)//4, 15)
+    nr_actors = max(len(cast)//4, 20)
     actors = [credit for i, credit in zip(
         range(nr_actors), cast) if credit['gender'] == 2]
     actresses = [credit for i, credit in zip(
@@ -129,6 +129,18 @@ def add_movie_and_director_to_db(film):
             db_genre = Genre(name=genre['name'])
             db_genre.films.append(db_film)
             db.session.add(db_genre)
+
+    
+    ''' This part adds language to the database '''
+    spoken_languages = tmdb_film_info['spoken_languages']
+    for language in spoken_languages:
+        if language_is_in_db(language):
+            Language.query.get(language['english_name']).films.append(db_film)
+        else:
+            db_language = Language(name=language['english_name'])
+            db_language.films.append(db_film)
+            db.session.add(db_language)
+
     db.session.commit()
 
 
@@ -193,6 +205,28 @@ def query_user_attr(username: str, attr_type: str) -> List[Tuple]:
     return getattr(user, attr_type.lower())
 
 
+def query_member_from_category_by_id(category: str, id: str) -> Union[DatabaseType, None]:
+    
+    if category == 'Director':
+        return Director.query.get(int(id))
+    
+    elif category == 'Actor':
+        return Actor.query.get(int(id))
+
+    elif category == 'Actress':
+        return Actress.query.get(int(id))
+    
+    elif category == 'Genre':
+        return Genre.query.get(id)
+
+    elif category == 'Country':
+        return Country.query.get(id)
+
+    elif category == 'Language':
+        return Language.query.get(id)
+    else:
+        return None
+
 def add_user_to_db(username, logged_films_compact, pages, avatar_url):
     user = User(username=username,
                 film=logged_films_compact,
@@ -217,6 +251,10 @@ def update_db_user_category(username: str, category: List[Tuple], category_type:
     setattr(user, category_type.lower(), category)
     db.session.commit()
 
+def update_db_user_diary(username: str, diary: List[Tuple]) -> None:
+    user = User.query.get(username)
+    user.diary = diary
+    db.session.commit()
 
 def get_primary_key(category: DatabaseType) -> Union[int, str]:
     return inspect(category).identity[0]
@@ -243,6 +281,26 @@ def query_user_films_from_year(username: str, year: str, sort: bool = False) -> 
     return user_films_this_year
 
 
+def query_user_films_from_member(username: str, category: str, id: str, sort: bool = False) -> List[Tuple[str, int, int, str]]:
+    user = User.query.get(username)
+    member = query_member_from_category_by_id(category=category.capitalize(), id=id)
+
+    user_film_ids = {id for (id, _) in user.film}
+    member_film_ids = {film.letterboxd_id for film in member.films}
+
+    user_film_ids_this_member = set.intersection(user_film_ids, member_film_ids)
+    user_films_this_member = []
+    for film in user.film:
+        if film[0] in user_film_ids_this_member:
+            db_film = Film.query.get(film[0])
+            tmp = (db_film.title, film[0], film[1], db_film.poster_url)
+            user_films_this_member.append(tmp)
+    if sort:
+        user_films_this_member = sorted(user_films_this_member, key=lambda x: (
+            isinstance(x[2], int), x[2]), reverse=True)
+
+    return user_films_this_member
+
 def query_user_years(username: str) -> dict:
     u = User.query.get(username)
     if u.year is not None:
@@ -253,22 +311,24 @@ def query_user_years(username: str) -> dict:
     return years
 
 
-def query_user_directors(username: str) -> dict:
-    u = User.query.get(username)
-    if u.director is not None:
-        sorted_directors = sorted(u.director, key=lambda x: x[1])
-        directors = {director[0]: director[1] for director in sorted_directors}
+def query_category_search_labels(username: str, category: str) -> dict:
+    user_attr = query_user_attr(username, category)
+    if user_attr is not None:
+        sorted_attr = sorted(user_attr, key=lambda x: x[1])
+        labels = {attr[0]: attr[1] for attr in sorted_attr}
     else:
-        directors = {}
-    return directors
+        labels = {}
+    return labels
 
 
-def query_user_director(username: str, id: int) -> Tuple:
-    all_directors = query_user_attr(username, 'Director')
-    director = [director for director in all_directors if director[0] == int(id)]
-    return director[0]
+def query_user_member_from_category(username: str, category: str, id: str) -> Tuple:
+    all_members_of_category = query_user_attr(username, category)
 
+    if id.isnumeric():
+        id = int(id)
 
+    member = [member for member in all_members_of_category if member[0] == id]
+    return member[0]
 
 def user_is_in_db(username: str) -> bool:
     return User.query.get(username) is not None
@@ -296,3 +356,6 @@ def actress_is_in_db(actress: dict) -> bool:
 
 def genre_is_in_db(genre: dict) -> bool:
     return Genre.query.get(genre['name']) is not None
+
+def language_is_in_db(language: dict) -> bool:
+    return Language.query.get(language['english_name']) is not None

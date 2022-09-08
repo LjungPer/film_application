@@ -1,0 +1,122 @@
+
+{% extends "base.html" %}
+{% block content %}
+
+<h1>{{ session['username']}} stats for director {{ category.1 }}</h1>
+
+<div style="width: 100%;">
+
+    <a href="https://letterboxd.com/kattihatt2/" class="circle">
+        <img height="128" width="128" src={{ session['avatar_url'] }}>
+    </a>
+    <p>Logged films: {{ category.4 }}</p>
+    <p>Average rating: {{ category.2 }}</p>
+    <p>Bias rating: {{ category.3 }}</p>
+</div>
+
+
+<div class="rowThree">
+
+        <div class="columnThree">
+            
+                <h2>Top films of {{ category_type.lower() }}</h2>
+                <table class="yearTable">
+                    <tr class="yearRow">
+                        <th class="yearColumn"></th>
+                        <th class="yearColumn">Title</th>
+                        <th class="yearColumn">Rating</th>
+                    </tr>
+                    {% for i in films %}
+                    <tr class="yearRow">
+                        <td class="yearColumn">
+                            <a href={{ i.3 }}>
+                                <img height="67" width="45" src={{ i.3 }}>
+                            </a>
+                        </td>
+                        <td class="yearColumn">
+                            {{ loop.index }}. {{ i.0 }}
+                        </td>
+                        <td class="yearColumn">{{ i.2 }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+
+        </div>
+
+        <div class="columnThree">
+
+                <canvas id="myChart"></canvas>
+
+        </div>
+
+        <div class="columnThree"> 
+            <form action="{{ url_for('stats', category=category_type.lower()) }}" method="POST" novalidate>
+            {{ category_form.hidden_tag() }}
+                <table style="text-align:center; margin: 0 auto;">
+                    <tr>
+                        <td>
+                            Search {{ category_type.lower() }}
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>{{ category_form.name }}</td>
+                        <td>{{ category_form.submit }}</td>
+                    </tr>
+                </table>
+            </form>
+            <script>
+            $(document).ready(function() {
+                $('#name').select2({  // init Select2 on form's name field
+                    placeholder: "{{ category_form.name.label.text }}",
+                    allowClear: true,
+                    "width": "style"
+                });
+            });
+            </script>
+        </div>
+
+</div>
+
+<script>  
+
+    const data = {
+        labels: {{ label|tojson }},
+        datasets: [
+            {
+                data: {{ data|tojson }},
+                fill: false,
+                borderColor: 'rgb(4, 170, 109)',
+                backgroundColor: 'rgba(4, 170, 109, 0.5)', 
+                borderWidth: 2,
+                borderRadius: Number.MAX_VALUE,
+                borderSkipped: false, 
+            }
+        ]
+    };
+
+    const config = {
+        type: 'bar',
+        data: data,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: 'Rating distribution'
+                }
+            },
+
+        }
+    };
+</script>
+<script>
+  const myChart = new Chart(
+    document.getElementById('myChart'),
+    config
+  );
+</script>
+{% endblock %}

@@ -1,27 +1,181 @@
+
 {% extends "base.html" %}
 {% block content %}
 
-<h1>Stats for user {{ session['username'] }}</h1>
+<h1>{{ category_type }} statistics</h1>
 
-<div>
-    <p>User {{ session['username'] }} has {{ session['pages'] }} pages of ratings.</p>
+<div style="width: 100%;">
+
+    <div style="width: 49%; float: left;">
+
+        <div style="float: right;">
+            <a href="https://letterboxd.com/kattihatt2/" class="circle">
+                <img height="128" width="128" src={{ session['avatar_url'] }}>
+            </a>
+        </div>
+
+    </div>
+
+    <div style="width: 49%; float: right; text-align: left;">
+        <h3>{{ session['username'] }}</h3>
+    </div>
+
 </div>
 
-<a id="avatar" class="circle">
-    <img height="128" width="128" src={{ session['avatar_url'] }}>
-</a>
 
-<script>
-    let tmp = document.getElementById('avatar');
-    tmp.href = "https://letterboxd.com/" + {{ session['username']|tojson }} + "/";
+<body>
+
+    <div style="width: 80%; display: table; margin: 0 auto;">
+
+        <div style="width: 50%; padding: 10px; float: left;">
+
+            <div class="select" style="width: 28%; margin: 0 auto;">
+            <select id="sorting" onchange="changeChart(this.value);">
+                <option value="avg">Average</option>
+                <option value="bias">Bias</option>
+                <option value="nr_films">Number of films</option>
+            </select>
+            </div>
+
+            <div style="padding: 3%;">
+                <canvas id="directorChart"></canvas>
+            </div>
+
+        </div>
+
+        <div style="width: 30%; padding: 1%; float: right;">
+
+            <form action="{{ url_for('stats', category=category_type.lower()) }}" method="POST" novalidate>
+            {{ category_form.hidden_tag() }}
+                <table style="text-align:center; margin: 0 auto;">
+                    <tr>
+                        <td>
+                            Search {{ category_type.lower() }}
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>{{ category_form.name }}</td>
+                        <td>{{ category_form.submit }}</td>
+                    </tr>
+                </table>
+            </form>
+
+            <script>
+            $(document).ready(function() {
+                $('#name').select2({
+                    placeholder: "{{ category_form.name.label.text }}",
+                    allowClear: true,
+                    "width": "style"
+                });
+            });
+            </script>
+
+            <table id="myTable" class="topTable">
+                <tr class="topRow">
+                    <th id="year" class="topColumn">{{ category_type }}</th>
+                    <th id="average" style="opacity: 0.6;" class="topColumn"><a onclick="fetchCategory('Actor', 'average')"><b>Average</b></a></th>
+                    <th id="biased" style="opacity: 0.6;" class="topColumn"><a onclick="fetchCategory('Actor', 'biased')"><b>Biased</b></a></th>
+                    <th id="films" style="opacity: 0.6;" class="topColumn"><a onclick="fetchCategory('Actor', 'films')"><b>Films</b></a></th>
+                </tr>
+                <tbody id="testBody"></tbody>
+            </table>
+            <script src="{{ url_for('static', filename='fetchCategory.js') }}"></script>
+            <script>fetchCategory("{{ category_type }}", 'biased');</script>
+
+        </div>
+
+    </div>
+
+<script>  
+
+    function directorChartConfig(dataInput, titleInput, maxInput, labelInput) {
+        
+        const dataConfig = {
+            labels: labelInput,
+            datasets: [
+                {
+                    data: dataInput,
+                    fill: false,
+                    borderColor: 'rgb(4, 170, 109)',
+                    backgroundColor: 'rgba(4, 170, 109, 0.5)', 
+                    borderWidth: 2,
+                    borderRadius: Number.MAX_VALUE,
+                    borderSkipped: false, 
+                }
+            ]
+        };
+
+        config = {
+            type: 'bar',
+            data: dataConfig,
+            options: {
+            responsive: true,
+            indexAxis: 'y',
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: titleInput,
+                    font: {
+                        size: 18
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    min: 0,
+                    max: maxInput,
+                    ticks: {
+                        font: {
+                            size: 16
+                        }
+                    }
+                },
+                y: {
+                    stacked: true,
+                    ticks: {
+                        autoSkip: false,
+                        font: {
+                            size: 16
+                        }
+                    }
+                }
+            }
+
+        }
+        };
+        return config;
+    }
+
 </script>
 
-<div>
-    <p>A simple app where you provide your letterboxd username, and we provide you with some data.</p>
-</div>
+<script>
+    let chart = new Chart(document.getElementById('directorChart'), directorChartConfig({{ avg[0][0:10]|tojson }}, 'Average rating', 10, {{ avg[1][0:10]|tojson }}));
+    function changeChart(value) {
+        chart.destroy();
+        if (value == 'avg') {
+            data = {{ avg[0][0:10]|tojson }};
+            title = 'Average rating';
+            max = 10;
+            labels = {{ avg[1][0:10]|tojson }};
+        } else if (value == 'bias') {
+            data = {{ bias[0][0:10]|tojson }};
+            title = 'Bias rating';
+            max = 10;
+            labels = {{ bias[1][0:10]|tojson }};
+        } else {
+            data = {{ nr_films[0][0:10]|tojson }};
+            title = 'Number of films';
+            max = {{ nr_films[0]|max|tojson }} + 1;
+            labels = {{ nr_films[1][0:10]|tojson }};
+        };
+        chart = new Chart(document.getElementById('directorChart'), directorChartConfig(data, title, max, labels));
+    }
+</script>
 
-<div style="margin-top: 30px;">
-    <a href="{{ url_for('loading') }}" class="buttonTest" rel="nofollow">Update data</a>
-</div>
-
+</body>
 {% endblock %}

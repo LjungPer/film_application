@@ -1,12 +1,24 @@
-from audioop import avg
-import json
 from flask import render_template, flash, redirect, session, url_for, jsonify
 from app import app
-from app.forms import LoginForm, UpdateDataForm, FetchYearDataForm, YearSearchForm, NameSearchForm
-from app.manager import get_data_for_all_directors, update_db_with_new_films, set_up_user, update_user_info, get_ratings_from_films, get_data_for_all_years
+from app.forms import LoginForm, UpdateDataForm, YearSearchForm, NameSearchForm
+from app.manager import (
+    get_data_for_all_of_category, 
+    get_data_for_all_years,
+    get_ratings_from_films,
+    update_db_with_new_films,
+    update_user_info,
+    set_up_user
+)
 from app.user import update_user_statistics
 from app.fetch import get_top_category
-from app.database import query_user_films_from_year, query_user_years, query_user, query_user_directors, query_user_director
+from app.database import (
+    query_category_search_labels,
+    query_user,
+    query_user_films_from_member,
+    query_user_films_from_year,
+    query_user_member_from_category,
+    query_user_years
+) 
 
 
 @app.route('/')
@@ -21,13 +33,13 @@ def login():
         session['pages'] = u.pages
         session['avatar_url'] = u.avatar_url
 
-        return redirect(url_for('stats'))
+        return redirect(url_for('home'))
     else:
         return render_template('login.html', title='Load data', form=form)
 
 
-@app.route('/stats', methods=['GET', 'POST'])
-def stats():
+@app.route('/home', methods=['GET', 'POST'])
+def home():
     update_data_form = UpdateDataForm()
 
     if session['pages'] == -1:
@@ -39,7 +51,7 @@ def stats():
     if update_data_form.validate_on_submit():
         return redirect(url_for('loading'))
 
-    return render_template('stats.html', form=update_data_form)
+    return render_template('home.html', form=update_data_form)
 
 
 @app.route('/categories/<category_type>/<sorting_type>', methods=["GET"])
@@ -64,7 +76,7 @@ def update_data():
     update_db_with_new_films(user_films)
     update_user_statistics(username)
 
-    return redirect(url_for('stats'))
+    return redirect(url_for('home'))
 
 
 @app.route('/years', methods=['GET', 'POST'])
@@ -87,7 +99,7 @@ def years():
                             avg_year=all_years[avg.index(max(avg))])
 
 
-@app.route('/year/<year>', methods=['GET', 'POST'])
+@app.route('/years/<year>', methods=['GET', 'POST'])
 def year(year):
     username = session['username']
     year_form = YearSearchForm()
@@ -109,19 +121,19 @@ def year(year):
                            avg_rating=avg_rating, year_form=year_form)
 
 
-@app.route('/directors', methods=['GET', 'POST'])
-def directors():
+@app.route('/<category>', methods=['GET', 'POST'])
+def stats(category):
     username = session['username']
-    avg, bias, nr_films = get_data_for_all_directors(username)
-    director_form = NameSearchForm()
+    avg, bias, nr_films = get_data_for_all_of_category(username, category)
+    category_form = NameSearchForm()
     # options should be str so that empty choice option is valid
-    possible_names = query_user_directors(username)
-    director_form.name.choices = [("", "")] + [(uuid, name)
+    possible_names = query_category_search_labels(username, category)
+    category_form.name.choices = [("", "")] + [(uuid, name)
                                            for uuid, name in possible_names.items()]
 
-    if director_form.validate_on_submit() and director_form.name.data:
-        director_id = director_form.name.data
-        return redirect(url_for('director', id=director_id))
+    if category_form.validate_on_submit() and category_form.name.data:
+        category_id = category_form.name.data
+        return redirect(url_for('stat', category=category, id=category_id))
 
     avg_labels = [tmp[1] for tmp in avg]
     avg_scores = [tmp[2] for tmp in avg]
@@ -129,14 +141,41 @@ def directors():
     bias_scores = [tmp[3] for tmp in bias]
     nr_films_labels = [tmp[1] for tmp in nr_films]
     nr_films_scores = [tmp[4] for tmp in nr_films]
-    return render_template('directors.html', avg=avg_scores, avg_labels=avg_labels, bias=bias_scores, bias_labels=bias_labels, 
-                            nr_films=nr_films_scores, nr_films_labels=nr_films_labels, year_form=director_form)
+    return render_template('stats.html',
+                            avg=[avg_scores, avg_labels],
+                            bias=[bias_scores, bias_labels], 
+                            nr_films=[nr_films_scores, nr_films_labels],
+                            category_form=category_form,
+                            category_type=category.capitalize())
 
-
-
-@app.route('/director/<id>', methods=['GET', 'POST'])
-def director(id):
+                        
+@app.route('/<category>/<id>', methods=['GET', 'POST'])
+def stat(category, id):
     username = session['username']
-    director = query_user_director(username, id)
+    member = query_user_member_from_category(username, category, id)
+    member_form = NameSearchForm()
+    possible_names = query_category_search_labels(username, category)
+    member_form.name.choices = [("", "")] + [(uuid, name)
+                                           for uuid, name in possible_names.items()]
+    user_films_from_member = query_user_films_from_member(
+        username, category, id, sort=True)
+    ratings, _ = get_ratings_from_films(user_films_from_member)
 
-    return render_template('director.html', director=director[1])
+    if member_form.validate_on_submit() and member_form.name.data:
+        member_id = member_form.name.data
+        return redirect(url_for(category, id=member_id))
+
+    return render_template('stat.html', 
+                            category=member, 
+                            category_form=member_form, 
+                            films=user_films_from_member, 
+                            label=list(range(1, 11)), 
+                            data=ratings, 
+                            category_type=category)
+
+
+@app.route('/diary', methods=['GET', 'POST'])
+def diary():
+    username = session['username']
+
+    return render_template('diary.html')

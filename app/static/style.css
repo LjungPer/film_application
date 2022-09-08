@@ -33,8 +33,16 @@ a:hover {
   margin: 0;
 }
 
-.div {
-  overflow: hidden;
+.columnThree {
+  float: left;
+  width: 33.33%;
+}
+
+/* Clear floats after the columns */
+.rowThree:after {
+  content: "";
+  display: table;
+  clear: both;
 }
 
 /* Circle Avatar Styles */

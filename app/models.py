@@ -35,6 +35,10 @@ genre_film_table = db.Table('genre_film',
                                       db.ForeignKey('film.letterboxd_id')),
                             db.Column('name', db.Integer, db.ForeignKey('genre.name')))
 
+language_film_table = db.Table('language_film',
+                            db.Column('letterboxd_id', db.Integer,
+                                      db.ForeignKey('film.letterboxd_id')),
+                            db.Column('name', db.Integer, db.ForeignKey('language.name')))
 
 class Country(db.Model):
     name = db.Column(db.String(64), primary_key=True)
@@ -47,6 +51,12 @@ class Genre(db.Model):
 
     def __repr__(self):
         return '<Country {}>'.format(self.name)
+
+class Language(db.Model):
+    name = db.Column(db.String(64), primary_key=True)
+
+    def __repr__(self):
+        return '<Language {}>'.format(self.name)
 
 class Actor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -96,6 +106,8 @@ class Film(db.Model):
         'Actress', secondary=actress_film_table, backref=db.backref('films', lazy='dynamic'))
     genre = db.relationship(
         'Genre', secondary=genre_film_table, backref=db.backref('films', lazy='dynamic'))
+    language = db.relationship(
+        'Language', secondary=language_film_table, backref=db.backref('films', lazy='dynamic'))
 
     def __repr__(self):
         return '<Film {}>'.format(self.title)
@@ -129,6 +141,8 @@ class User(db.Model):
     actor = db.Column(db.PickleType)
     actress = db.Column(db.PickleType)
     genre = db.Column(db.PickleType)
+    language = db.Column(db.PickleType)
+    diary = db.Column(db.PickleType)
 
     def __repr__(self):
         return '<User {}>'.format(self.username)

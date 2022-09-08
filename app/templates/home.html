@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1>Stats for user {{ session['username'] }}</h1>
+
+<div>
+    <p>User {{ session['username'] }} has {{ session['pages'] }} pages of ratings.</p>
+</div>
+
+<a id="avatar" class="circle">
+    <img height="128" width="128" src={{ session['avatar_url'] }}>
+</a>
+
+<script>
+    let tmp = document.getElementById('avatar');
+    tmp.href = "https://letterboxd.com/" + {{ session['username']|tojson }} + "/";
+</script>
+
+<div>
+    <p>A simple app where you provide your letterboxd username, and we provide you with some data.</p>
+</div>
+
+<div style="margin-top: 30px;">
+    <a href="{{ url_for('loading') }}" class="buttonTest" rel="nofollow">Update data</a>
+</div>
+
+{% endblock %}

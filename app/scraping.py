@@ -35,10 +35,49 @@ async def scrape_pages_of_user_films_by_date(username, num_pages):
         scraped_pages = await asyncio.gather(*tasks)
     return scraped_pages
 
+
 @timed
-def get_page_count(username):
+async def scrape_user_diary_pages(username, num_pages):
+
+    url = 'https://letterboxd.com/{}/films/diary/page/{}'
+
+    async with ClientSession() as session:
+        tasks = []
+
+        for i in range(num_pages):
+            task = asyncio.ensure_future(fetch(url.format(username, i+1), session))
+            tasks.append(task)
+
+        scraped_pages = await asyncio.gather(*tasks)
+    return scraped_pages
+
+
+@timed
+def get_user_avatar_src(username):
+    user_url = "https://letterboxd.com/{}/"
+    r = requests.get(user_url.format(username))
+    soup = BeautifulSoup(r.text, "lxml")
+    avatar_url = soup.findAll('img')[0]['src']
+    return avatar_url
+
+
+@timed
+def get_films_page_count(username):
     url = "https://letterboxd.com/{}/films/by/date"
-    r = requests.get(url.format(username))
+    num_pages = get_page_count_from_url(url.format(username))
+    return num_pages
+
+
+@timed
+def get_diary_page_count(username):
+    url = 'https://letterboxd.com/{}/films/diary/'
+    num_pages = get_page_count_from_url(url.format(username))
+    return num_pages
+
+
+def get_page_count_from_url(url):
+    
+    r = requests.get(url)
     soup = BeautifulSoup(r.text, "lxml")
 
     body = soup.find("body")
@@ -54,11 +93,3 @@ def get_page_count(username):
         num_pages = 1
 
     return num_pages
-
-@timed
-def get_user_avatar_src(username):
-    user_url = "https://letterboxd.com/{}/"
-    r = requests.get(user_url.format(username))
-    soup = BeautifulSoup(r.text, "lxml")
-    avatar_url = soup.findAll('img')[0]['src']
-    return avatar_url

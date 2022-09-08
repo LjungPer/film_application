@@ -1,10 +1,11 @@
 import re
 from bs4 import BeautifulSoup, SoupStrainer
 from app.database import extract_films_not_in_db, add_films_to_db, query_user_attr, user_is_in_db, add_user_to_db, update_db_user
-from app.scraping import scrape_letterboxd_urls_of_films, scrape_pages_of_user_films_by_date, get_page_count, get_user_avatar_src
+from app.scraping import scrape_letterboxd_urls_of_films, scrape_pages_of_user_films_by_date, get_films_page_count, get_user_avatar_src, get_diary_page_count, scrape_user_diary_pages
 import asyncio
 from app.decorators import timed
-from typing import List
+from typing import List, Tuple
+import pandas as pd
 
 
 def set_up_user(username):
@@ -26,7 +27,7 @@ def update_user_info(username, return_logged_films=False):
 
 def get_user_info(username):
 
-    num_pages = get_page_count(username)
+    num_pages = get_films_page_count(username)
     avatar_url = get_user_avatar_src(username)
     logged_films = get_user_films(username, num_pages)
 
@@ -189,10 +190,83 @@ def get_data_for_all_years(username):
             nr_films.append(0)
     return all_years, avg, bias, nr_films
 
-def get_data_for_all_directors(username):
-    user_directors = query_user_attr(username, 'Director')
-    avg = sorted(user_directors, key=lambda x: float(x[2]), reverse=True)
-    bias = sorted(user_directors, key=lambda x: float(x[3]), reverse=True)
-    nr_films = sorted(user_directors, key=lambda x: int(x[4]), reverse=True)
+def get_data_for_all_of_category(username: str, category: str):
+    user_category = query_user_attr(username, category)
+    avg = sorted(user_category, key=lambda x: float(x[2]), reverse=True)
+    bias = sorted(user_category, key=lambda x: float(x[3]), reverse=True)
+    nr_films = sorted(user_category, key=lambda x: int(x[4]), reverse=True)
             
     return avg, bias, nr_films
+
+
+def get_diary_entries(username: str) -> List[Tuple]:
+    num_pages = get_diary_page_count(username)
+
+    async def inner():
+        scraped_diary_pages = await scrape_user_diary_pages(username, num_pages)
+        user_diary_entries = get_user_diary_entries_from_scraped_pages(scraped_diary_pages)
+        return user_diary_entries
+
+    asyncio.set_event_loop(asyncio.SelectorEventLoop())
+    loop = asyncio.get_event_loop()
+    future = asyncio.ensure_future(inner())
+    user_diary_entries = loop.run_until_complete(future)
+
+    return user_diary_entries
+
+
+def get_user_diary_entries_from_scraped_pages(scraped_pages) -> List[Tuple]:
+    user_diary_entries = []
+    for current_page in scraped_pages:
+        entries_of_current_page = get_entries_of_diary_page(current_page)
+
+        for entry in entries_of_current_page:
+            user_diary_entry = create_user_diary_entry_from_scraped_entry(entry)
+            user_diary_entries.append(user_diary_entry)
+    return user_diary_entries
+
+
+def get_entries_of_diary_page(page):
+    soup = BeautifulSoup(page, 'lxml')
+    return soup.findAll('a', attrs={'class': 'edit-review-button has-icon icon-16 icon-edit'})
+
+
+def create_user_diary_entry_from_scraped_entry(entry) -> Tuple:
+    letterboxd_id = int(entry['data-film-id'])
+    title = entry['data-film-name']
+    rewatch = 1 if entry['data-rewatch'] == 'true' else 0
+    date = entry['data-viewing-date']
+    reviewed = 0 if entry['data-review-text'] == "" else 1
+    return (letterboxd_id, title, rewatch, date, reviewed)
+
+def get_yearly_diary_data(diary):
+    diary_by_year = {}
+    for entry in diary:
+        year_of_entry = get_year_of_diary_entry(entry)
+        if year_of_entry in diary_by_year:
+            diary_by_year[year_of_entry].append(entry)
+        else:
+            diary_by_year[year_of_entry] = [entry]
+    return diary_by_year
+
+
+def get_year_of_diary_entry(entry):
+    date_string = entry[3] # date, e.g. '2022-01-15'
+    year = int(date_string.split("-")[0])
+    return year
+
+def get_number_of_watched_films_per_weekday_of_year(diary: dict, year: int) -> dict:
+    diary_entries_of_the_year = diary[year]
+    watched_films_per_weekday = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0}
+    for entry in diary_entries_of_the_year:
+        weekday = get_weekday_of_diary_entry(entry)
+        watched_films_per_weekday[weekday] += 1
+    return watched_films_per_weekday
+
+
+def get_weekday_of_diary_entry(entry):
+    date_string = entry[3]
+    timestamp = pd.Timestamp(date_string)
+    day_of_week = timestamp.dayofweek
+    return day_of_week
+
