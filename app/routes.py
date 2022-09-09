@@ -7,7 +7,8 @@ from app.manager import (
     get_ratings_from_films,
     update_db_with_new_films,
     update_user_info,
-    set_up_user
+    set_up_user,
+    get_diary_info
 )
 from app.user import update_user_statistics
 from app.fetch import get_top_category
@@ -177,5 +178,6 @@ def stat(category, id):
 @app.route('/diary', methods=['GET', 'POST'])
 def diary():
     username = session['username']
+    weekdays = get_diary_info(username)
 
-    return render_template('diary.html')
+    return render_template('diary.html', weekdays=weekdays)

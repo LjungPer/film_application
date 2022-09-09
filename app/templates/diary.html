@@ -4,5 +4,53 @@
 
 <h1>Diary</h1>
 
-</body>
+<div class="rowThree">
+
+    <div class="columnThree">
+            <canvas id="weekdayChart"></canvas>
+    </div>
+
+</div>
+
+<script>  
+
+    const data = {
+        labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+        datasets: [
+            {
+                data: {{ weekdays|tojson }},
+                fill: false,
+                borderColor: 'rgb(4, 170, 109)',
+                backgroundColor: 'rgba(4, 170, 109, 0.5)', 
+                borderWidth: 2,
+                borderRadius: Number.MAX_VALUE,
+                borderSkipped: false, 
+            }
+        ]
+    };
+
+    const config = {
+        type: 'bar',
+        data: data,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: 'Watched films by day of week'
+                }
+            },
+
+        }
+    };
+</script>
+<script>
+  const myChart = new Chart(
+    document.getElementById('weekdayChart'),
+    config
+  );
+</script>
 {% endblock %}

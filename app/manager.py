@@ -199,6 +199,13 @@ def get_data_for_all_of_category(username: str, category: str):
     return avg, bias, nr_films
 
 
+def get_diary_info(username: str):
+    diary = get_diary_entries(username)
+    yearly_diary = get_yearly_diary_data(diary)
+    weekday_info = get_number_of_watched_films_per_weekday_of_year(yearly_diary, 2022)
+    return weekday_info
+
+
 def get_diary_entries(username: str) -> List[Tuple]:
     num_pages = get_diary_page_count(username)
 
@@ -261,7 +268,7 @@ def get_number_of_watched_films_per_weekday_of_year(diary: dict, year: int) -> d
     for entry in diary_entries_of_the_year:
         weekday = get_weekday_of_diary_entry(entry)
         watched_films_per_weekday[weekday] += 1
-    return watched_films_per_weekday
+    return list(watched_films_per_weekday.values())
 
 
 def get_weekday_of_diary_entry(entry):
