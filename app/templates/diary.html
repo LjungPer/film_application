@@ -10,11 +10,84 @@
             <canvas id="weekdayChart"></canvas>
     </div>
 
+    <div class="columnThree">
+            <canvas id="weekChart"></canvas>
+    </div>
+
+    <div class="columnThree">
+            <canvas id="monthChart"></canvas>
+    </div>
 </div>
 
 <script>  
 
-    const data = {
+
+    const month_data = {
+        labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+        datasets: [
+            {
+                data: {{ months|tojson }},
+                fill: false,
+                borderColor: 'rgb(4, 170, 109)',
+                backgroundColor: 'rgba(4, 170, 109, 0.5)', 
+                borderWidth: 2,
+                borderRadius: Number.MAX_VALUE,
+                borderSkipped: false, 
+            }
+        ]
+    };
+
+    const month_config = {
+        type: 'bar',
+        data: month_data,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: 'Watched films by day of week'
+                }
+            },
+
+        }
+    };
+
+    const week_data = {
+        labels: Array.from({length: {{ weeks|length|tojson }}}, (_, i) => i + 1),
+        datasets: [
+            {
+                data: {{ weeks|tojson }},
+                fill: false,
+                borderColor: 'rgb(4, 170, 109)',
+                backgroundColor: 'rgba(4, 170, 109, 0.5)', 
+                borderWidth: 2,
+                borderRadius: Number.MAX_VALUE,
+                borderSkipped: false, 
+            }
+        ]
+    };
+
+    const week_config = {
+        type: 'bar',
+        data: week_data,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: 'Watched films by day of week'
+                }
+            },
+
+        }
+    };
+    const weekday_data = {
         labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
         datasets: [
             {
@@ -29,9 +102,9 @@
         ]
     };
 
-    const config = {
+    const weekday_config = {
         type: 'bar',
-        data: data,
+        data: weekday_data,
         options: {
             responsive: true,
             plugins: {
@@ -48,9 +121,19 @@
     };
 </script>
 <script>
-  const myChart = new Chart(
+  const weekdayChart = new Chart(
     document.getElementById('weekdayChart'),
-    config
+    weekday_config
+  );
+
+  const weekChart = new Chart(
+    document.getElementById('weekChart'),
+    week_config
+  );
+
+  const monthChart = new Chart(
+    document.getElementById('monthChart'),
+    month_config
   );
 </script>
 {% endblock %}

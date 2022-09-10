@@ -178,6 +178,6 @@ def stat(category, id):
 @app.route('/diary', methods=['GET', 'POST'])
 def diary():
     username = session['username']
-    weekdays = get_diary_info(username)
+    weekdays, weeks, months = get_diary_info(username, 2022)
 
-    return render_template('diary.html', weekdays=weekdays)
+    return render_template('diary.html', weekdays=weekdays, weeks=weeks, months=months)

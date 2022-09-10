@@ -6,6 +6,8 @@ import asyncio
 from app.decorators import timed
 from typing import List, Tuple
 import pandas as pd
+import datetime
+import calendar
 
 
 def set_up_user(username):
@@ -199,11 +201,11 @@ def get_data_for_all_of_category(username: str, category: str):
     return avg, bias, nr_films
 
 
-def get_diary_info(username: str):
+def get_diary_info(username: str, year: int):
     diary = get_diary_entries(username)
-    yearly_diary = get_yearly_diary_data(diary)
-    weekday_info = get_number_of_watched_films_per_weekday_of_year(yearly_diary, 2022)
-    return weekday_info
+    yearly_diary = extract_yearly_diary_data(diary)
+    weekday_films, weekly_films, monthly_films = get_watched_films_statistics_of_year(yearly_diary, year)
+    return weekday_films, weekly_films, monthly_films
 
 
 def get_diary_entries(username: str) -> List[Tuple]:
@@ -246,7 +248,7 @@ def create_user_diary_entry_from_scraped_entry(entry) -> Tuple:
     reviewed = 0 if entry['data-review-text'] == "" else 1
     return (letterboxd_id, title, rewatch, date, reviewed)
 
-def get_yearly_diary_data(diary):
+def extract_yearly_diary_data(diary):
     diary_by_year = {}
     for entry in diary:
         year_of_entry = get_year_of_diary_entry(entry)
@@ -262,18 +264,39 @@ def get_year_of_diary_entry(entry):
     year = int(date_string.split("-")[0])
     return year
 
-def get_number_of_watched_films_per_weekday_of_year(diary: dict, year: int) -> dict:
+
+def get_watched_films_statistics_of_year(diary: dict, year: int) -> Tuple[List[int], List[int], List[int]]:
     diary_entries_of_the_year = diary[year]
-    watched_films_per_weekday = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0}
+    weekday_films = [0] * 7
+    weekly_films = [0] * (number_of_weeks_of_year(year) + 1)
+    monthly_films = [0] * 12
     for entry in diary_entries_of_the_year:
-        weekday = get_weekday_of_diary_entry(entry)
-        watched_films_per_weekday[weekday] += 1
-    return list(watched_films_per_weekday.values())
+
+        date = entry[3]
+        day, week, month = convert_date_string_to_ints(date)
+
+        weekday_films[day] += 1
+        if month == 1 and week > 50:
+            weekly_films[0] += 1
+        else:
+            weekly_films[week] += 1
+        monthly_films[month - 1] += 1
+    
+    return weekday_films, weekly_films, monthly_films
 
 
-def get_weekday_of_diary_entry(entry):
-    date_string = entry[3]
-    timestamp = pd.Timestamp(date_string)
-    day_of_week = timestamp.dayofweek
-    return day_of_week
+def convert_date_string_to_ints(date: str) -> Tuple[int, int, int]:
+    timestamp = pd.Timestamp(date)
+    day = timestamp.dayofweek
+    week = timestamp.week
+    month = timestamp.month
+    return day, week, month
 
+        
+def number_of_weeks_of_year(year: int) -> int:
+    first_day = datetime.datetime(year, 1, 1).weekday()
+    if calendar.isleap(year) and first_day == 2:
+        return 53
+    if first_day == 3:
+        return 53
+    return 52
