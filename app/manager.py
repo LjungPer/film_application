@@ -1,6 +1,6 @@
 import re
 from bs4 import BeautifulSoup, SoupStrainer
-from app.database import extract_films_not_in_db, add_films_to_db, query_user_attr, user_is_in_db, add_user_to_db, update_db_user
+from app.database import extract_films_not_in_db, add_films_to_db, query_user_attr, update_db_user_category, user_is_in_db, add_user_to_db, update_db_user
 from app.scraping import scrape_letterboxd_urls_of_films, scrape_pages_of_user_films_by_date, get_films_page_count, get_user_avatar_src, get_diary_page_count, scrape_user_diary_pages
 import asyncio
 from app.decorators import timed
@@ -200,9 +200,14 @@ def get_data_for_all_of_category(username: str, category: str):
             
     return avg, bias, nr_films
 
-
-def get_diary_info(username: str, year: int):
+def update_user_diary(username: str):
     diary = get_diary_entries(username)
+    update_db_user_category(username, diary, 'Diary')
+
+
+def get_diary_info_from_year(username: str, year: int):
+    #diary = get_diary_entries(username)
+    diary = query_user_attr(username, 'Diary')
     yearly_diary = extract_yearly_diary_data(diary)
     weekday_films, weekly_films, monthly_films = get_watched_films_statistics_of_year(yearly_diary, year)
     return weekday_films, weekly_films, monthly_films

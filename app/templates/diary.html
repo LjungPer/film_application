@@ -1,139 +1,36 @@
 
+
 {% extends "base.html" %}
 {% block content %}
 
 <h1>Diary</h1>
+<h2>All time</h2>
 
-<div class="rowThree">
-
-    <div class="columnThree">
-            <canvas id="weekdayChart"></canvas>
+    <div id="Search" style="margin-left: 50%;"> 
+        <form action="{{ url_for('diary') }}" method="POST" novalidate>
+        {{ year_form.hidden_tag() }}
+            <table style="text-align:center;">
+                <tr>
+                    <td>
+                        Search year
+                    </td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>{{ year_form.name }}</td>
+                    <td>{{ year_form.submit }}</td>
+                </tr>
+            </table>
+        </form>
+        <script>
+        $(document).ready(function() {
+            $('#name').select2({  // init Select2 on form's name field
+                placeholder: "{{ year_form.name.label.text }}",
+                allowClear: true,
+                "width": "style"
+            });
+        });
+        </script>
     </div>
 
-    <div class="columnThree">
-            <canvas id="weekChart"></canvas>
-    </div>
-
-    <div class="columnThree">
-            <canvas id="monthChart"></canvas>
-    </div>
-</div>
-
-<script>  
-
-
-    const month_data = {
-        labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-        datasets: [
-            {
-                data: {{ months|tojson }},
-                fill: false,
-                borderColor: 'rgb(4, 170, 109)',
-                backgroundColor: 'rgba(4, 170, 109, 0.5)', 
-                borderWidth: 2,
-                borderRadius: Number.MAX_VALUE,
-                borderSkipped: false, 
-            }
-        ]
-    };
-
-    const month_config = {
-        type: 'bar',
-        data: month_data,
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    display: false
-                },
-                title: {
-                    display: true,
-                    text: 'Watched films by day of week'
-                }
-            },
-
-        }
-    };
-
-    const week_data = {
-        labels: Array.from({length: {{ weeks|length|tojson }}}, (_, i) => i + 1),
-        datasets: [
-            {
-                data: {{ weeks|tojson }},
-                fill: false,
-                borderColor: 'rgb(4, 170, 109)',
-                backgroundColor: 'rgba(4, 170, 109, 0.5)', 
-                borderWidth: 2,
-                borderRadius: Number.MAX_VALUE,
-                borderSkipped: false, 
-            }
-        ]
-    };
-
-    const week_config = {
-        type: 'bar',
-        data: week_data,
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    display: false
-                },
-                title: {
-                    display: true,
-                    text: 'Watched films by day of week'
-                }
-            },
-
-        }
-    };
-    const weekday_data = {
-        labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
-        datasets: [
-            {
-                data: {{ weekdays|tojson }},
-                fill: false,
-                borderColor: 'rgb(4, 170, 109)',
-                backgroundColor: 'rgba(4, 170, 109, 0.5)', 
-                borderWidth: 2,
-                borderRadius: Number.MAX_VALUE,
-                borderSkipped: false, 
-            }
-        ]
-    };
-
-    const weekday_config = {
-        type: 'bar',
-        data: weekday_data,
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    display: false
-                },
-                title: {
-                    display: true,
-                    text: 'Watched films by day of week'
-                }
-            },
-
-        }
-    };
-</script>
-<script>
-  const weekdayChart = new Chart(
-    document.getElementById('weekdayChart'),
-    weekday_config
-  );
-
-  const weekChart = new Chart(
-    document.getElementById('weekChart'),
-    week_config
-  );
-
-  const monthChart = new Chart(
-    document.getElementById('monthChart'),
-    month_config
-  );
-</script>
 {% endblock %}

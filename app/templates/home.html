@@ -24,4 +24,10 @@
     <a href="{{ url_for('loading') }}" class="buttonTest" rel="nofollow">Update data</a>
 </div>
 
+<div>
+    {% if session['updated'] is sameas false %}
+        User data not yet synced. For more available stastistics, please sync data.
+    {% endif %}
+</div>
+
 {% endblock %}

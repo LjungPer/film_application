@@ -2,13 +2,15 @@ from flask import render_template, flash, redirect, session, url_for, jsonify
 from app import app
 from app.forms import LoginForm, UpdateDataForm, YearSearchForm, NameSearchForm
 from app.manager import (
+    extract_yearly_diary_data,
     get_data_for_all_of_category, 
     get_data_for_all_years,
     get_ratings_from_films,
     update_db_with_new_films,
     update_user_info,
     set_up_user,
-    get_diary_info
+    get_diary_info_from_year,
+    update_user_diary
 )
 from app.user import update_user_statistics
 from app.fetch import get_top_category
@@ -18,7 +20,8 @@ from app.database import (
     query_user_films_from_member,
     query_user_films_from_year,
     query_user_member_from_category,
-    query_user_years
+    query_user_years,
+    query_user_attr
 ) 
 
 
@@ -33,6 +36,10 @@ def login():
         u = query_user(username)
         session['pages'] = u.pages
         session['avatar_url'] = u.avatar_url
+        if query_user_attr(username, 'Year') is None:
+            session['updated'] = False
+        else:
+            session['updated'] = True
 
         return redirect(url_for('home'))
     else:
@@ -68,6 +75,9 @@ def categories(category_type, sorting_type):
 def loading():
     return render_template('loading.html')
 
+@app.route('/loading_diary', methods=['GET'])
+def loading_diary():
+    return render_template('loading_diary.html')
 
 @app.route('/update_data', methods=['GET', 'POST'])
 def update_data():
@@ -76,6 +86,7 @@ def update_data():
     user_films = update_user_info(username, return_logged_films=True)
     update_db_with_new_films(user_films)
     update_user_statistics(username)
+    session['updated'] = True
 
     return redirect(url_for('home'))
 
@@ -122,7 +133,7 @@ def year(year):
                            avg_rating=avg_rating, year_form=year_form)
 
 
-@app.route('/<category>', methods=['GET', 'POST'])
+@app.route('/category/<category>', methods=['GET', 'POST'])
 def stats(category):
     username = session['username']
     avg, bias, nr_films = get_data_for_all_of_category(username, category)
@@ -150,7 +161,7 @@ def stats(category):
                             category_type=category.capitalize())
 
                         
-@app.route('/<category>/<id>', methods=['GET', 'POST'])
+@app.route('/category/<category>/<id>', methods=['GET', 'POST'])
 def stat(category, id):
     username = session['username']
     member = query_user_member_from_category(username, category, id)
@@ -178,6 +189,27 @@ def stat(category, id):
 @app.route('/diary', methods=['GET', 'POST'])
 def diary():
     username = session['username']
-    weekdays, weeks, months = get_diary_info(username, 2022)
+    diary = query_user_attr(username, 'Diary')
+    if ('diary_entries' not in session or diary is None or session['diary_entries'] != len(diary)):
+        update_user_diary(username)
+        session['diary_entries'] = len(query_user_attr(username, 'Diary'))
+        diary = query_user_attr(username, 'Diary')
+    
+    yearly_diary = extract_yearly_diary_data(diary)
+    year_form = YearSearchForm()
+    year_form.name.choices = [("", "")] + [(year, year) for year in list(yearly_diary.keys())] 
 
-    return render_template('diary.html', weekdays=weekdays, weeks=weeks, months=months)
+    if year_form.validate_on_submit() and year_form.name.data:
+        year = year_form.name.data
+        return redirect(url_for('diary_year', year=year))
+
+    return render_template('diary.html', year_form=year_form)
+
+
+@app.route('/diary/<year>', methods=['GET', 'POST'])
+def diary_year(year):
+    year = int(year)
+    username = session['username']
+    weekdays, weeks, months = get_diary_info_from_year(username, year)
+    
+    return render_template('diary_year.html', year=year, weekdays=weekdays, weeks=weeks, months=months)

@@ -251,10 +251,6 @@ def update_db_user_category(username: str, category: List[Tuple], category_type:
     setattr(user, category_type.lower(), category)
     db.session.commit()
 
-def update_db_user_diary(username: str, diary: List[Tuple]) -> None:
-    user = User.query.get(username)
-    user.diary = diary
-    db.session.commit()
 
 def get_primary_key(category: DatabaseType) -> Union[int, str]:
     return inspect(category).identity[0]

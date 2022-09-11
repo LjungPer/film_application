@@ -1,4 +1,4 @@
-from app.database import query_user_attr, update_db_user_category, query_category_of_all_db_films, get_primary_key, update_db_user_diary
+from app.database import query_user_attr, update_db_user_category, query_category_of_all_db_films, get_primary_key
 from app.manager import get_diary_entries
 from typing import Tuple, List, Union
 from app.categories import *
@@ -12,7 +12,6 @@ def update_user_statistics(username: str) -> None:
     update_user_category(username, 'Actress')
     update_user_category(username, 'Genre')
     update_user_category(username, 'Language')
-    update_user_diary(username)
 
 
 def update_user_category(username: str, category_type: str) -> None:
@@ -62,7 +61,4 @@ def get_category_attrs(key: Union[int, str], category: Category) -> Tuple[Union[
 
     return key, name, avg_rating, bias_rating, nr_films
 
-def update_user_diary(username: str):
-    diary = get_diary_entries(username)
-    update_db_user_diary(username, diary)
     
