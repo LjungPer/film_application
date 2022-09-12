@@ -206,7 +206,6 @@ def update_user_diary(username: str):
 
 
 def get_diary_info_from_year(username: str, year: int):
-    #diary = get_diary_entries(username)
     diary = query_user_attr(username, 'Diary')
     yearly_diary = extract_yearly_diary_data(diary)
     weekday_films, weekly_films, monthly_films = get_watched_films_statistics_of_year(yearly_diary, year)
@@ -305,3 +304,29 @@ def number_of_weeks_of_year(year: int) -> int:
     if first_day == 3:
         return 53
     return 52
+
+def get_basic_data_from_year(username: str, year: int) -> Tuple[int, int, int, list]:
+    diary = query_user_attr(username, 'Diary')
+    yearly_diary = extract_yearly_diary_data(diary)
+    nr_films = len(yearly_diary[year])
+    nr_reviews = 0
+    nr_rewatches = 0
+    nr_watches_per_film = {}
+    for entry in yearly_diary[year]:
+        nr_reviews += entry[4]
+        nr_rewatches += entry[2]
+
+        id = entry[0]
+        if id in nr_watches_per_film:
+            nr_watches_per_film[id] += 1
+        else:
+            nr_watches_per_film[id] = 1
+
+    nr_watches_per_film = dict(sorted(nr_watches_per_film.items(), key=lambda item: item[1], reverse=True))
+    top_five_watched_films = []
+    for key in nr_watches_per_film:
+        top_five_watched_films.append((key, nr_watches_per_film[key]))
+        if len(top_five_watched_films) == 5:
+            break
+
+    return nr_films, nr_rewatches, nr_reviews, top_five_watched_films

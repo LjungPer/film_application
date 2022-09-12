@@ -3,6 +3,7 @@ from app import app
 from app.forms import LoginForm, UpdateDataForm, YearSearchForm, NameSearchForm
 from app.manager import (
     extract_yearly_diary_data,
+    get_basic_data_from_year,
     get_data_for_all_of_category, 
     get_data_for_all_years,
     get_ratings_from_films,
@@ -211,5 +212,7 @@ def diary_year(year):
     year = int(year)
     username = session['username']
     weekdays, weeks, months = get_diary_info_from_year(username, year)
+    nr_watches, nr_rewatches, nr_reviews, top_five_watched_films = get_basic_data_from_year(username, year)
     
-    return render_template('diary_year.html', year=year, weekdays=weekdays, weeks=weeks, months=months)
+    return render_template('diary_year.html', year=year, weekdays=weekdays, weeks=weeks, months=months,
+                            watches=nr_watches, rewatches=nr_rewatches, reviews=nr_reviews)

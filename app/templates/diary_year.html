@@ -3,19 +3,22 @@
 {% block content %}
 
 <h1>User {{ session['username'] }}'s {{ year }} in summary</h1>
+<p>Logged films: {{ watches }}</p>
+<p>Rewatches: {{ rewatches }}</p>
+<p>Reviews: {{ reviews }}</p>
 
-<div class="rowThree">
+<div class="three-flex-container">
 
-    <div class="columnThree">
-            <canvas id="weekdayChart"></canvas>
+    <div>
+        <canvas id="weekdayChart"></canvas>
     </div>
 
-    <div class="columnThree">
-            <canvas id="weekChart"></canvas>
+    <div>
+        <canvas id="weekChart"></canvas>
     </div>
 
-    <div class="columnThree">
-            <canvas id="monthChart"></canvas>
+    <div>
+        <canvas id="monthChart"></canvas>
     </div>
 </div>
 
@@ -48,7 +51,7 @@
                 },
                 title: {
                     display: true,
-                    text: 'Watched films by day of week'
+                    text: 'Watched films by month'
                 }
             },
 
@@ -81,7 +84,7 @@
                 },
                 title: {
                     display: true,
-                    text: 'Watched films by day of week'
+                    text: 'Watched films by week'
                 }
             },
 
