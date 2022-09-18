@@ -61,6 +61,7 @@ class Language(db.Model):
 class Actor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64))
+    avatar_url = db.Column(db.String(128))
 
     def __repr__(self):
         return '<Actor {}>'.format(self.name)
@@ -69,6 +70,7 @@ class Actor(db.Model):
 class Actress(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64))
+    avatar_url = db.Column(db.String(128))
 
     def __repr__(self):
         return '<Actress {}>'.format(self.name)
@@ -84,6 +86,8 @@ class Year(db.Model):
 class Director(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64))
+    avatar_url = db.Column(db.String(128))
+    
 
     def __repr__(self):
         return '<Director {}>'.format(self.name)

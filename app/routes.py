@@ -1,5 +1,6 @@
 from flask import render_template, flash, redirect, session, url_for, jsonify
 from app import app
+from app.diary import get_all_diary_info_from_year
 from app.forms import LoginForm, UpdateDataForm, YearSearchForm, NameSearchForm
 from app.manager import (
     extract_yearly_diary_data,
@@ -213,6 +214,21 @@ def diary_year(year):
     username = session['username']
     weekdays, weeks, months = get_diary_info_from_year(username, year)
     nr_watches, nr_rewatches, nr_reviews, top_five_watched_films = get_basic_data_from_year(username, year)
+    directors, years, actors, actresses, genres, languages, countries = get_all_diary_info_from_year(username, year)
     
-    return render_template('diary_year.html', year=year, weekdays=weekdays, weeks=weeks, months=months,
-                            watches=nr_watches, rewatches=nr_rewatches, reviews=nr_reviews)
+    return render_template('diary_year.html', 
+                            year=year, 
+                            weekdays=weekdays, 
+                            weeks=weeks, 
+                            months=months,
+                            watches=nr_watches, 
+                            rewatches=nr_rewatches, 
+                            reviews=nr_reviews
+                            top_films=top_five_watched_films,
+                            top_directors=directors,
+                            top_years=years,
+                            top_actors=actors,
+                            top_actresses=actresses,
+                            top_genres=genres,
+                            top_languages=languages,
+                            top_countries=countries)

@@ -71,8 +71,9 @@ def add_movie_and_director_to_db(film):
         if director_is_in_db(director):
             Director.query.get(int(director['id'])).films.append(db_film)
         else:
-            db_director = Director(
-                id=director['id'], name=director['name'])
+            db_director = Director(id=director['id'], 
+                                    name=director['name'], 
+                                    avatar_url=crew_avatar_url(director['profile_path']))
             db_director.films.append(db_film)
             db.session.add(db_director)
 
@@ -108,7 +109,9 @@ def add_movie_and_director_to_db(film):
         if actor_is_in_db(actor):
             Actor.query.get(actor['id']).films.append(db_film)
         else:
-            db_actor = Actor(id=actor['id'], name=actor['name'])
+            db_actor = Actor(id=actor['id'], 
+                                name=actor['name'], 
+                                avatar_url=crew_avatar_url(actor['profile_path']))
             db_actor.films.append(db_film)
             db.session.add(db_actor)
 
@@ -116,7 +119,9 @@ def add_movie_and_director_to_db(film):
         if actress_is_in_db(actress):
             Actress.query.get(actress['id']).films.append(db_film)
         else:
-            db_actress = Actress(id=actress['id'], name=actress['name'])
+            db_actress = Actress(id=actress['id'], 
+                                    name=actress['name'], 
+                                    avatar_url=crew_avatar_url(actress['profile_path']))
             db_actress.films.append(db_film)
             db.session.add(db_actress)
 
@@ -177,6 +182,13 @@ def add_tv_to_db(film):
     db.session.commit()
 
 
+def crew_avatar_url(path: Union[str, None]) -> Union[str, None]:
+    if path is not None:
+        return 'https://www.themoviedb.org/t/p/w300_and_h450_bestv2/' + path
+    else:
+        return path
+
+
 @timed
 def query_category_of_all_db_films(category_type: str) -> dict:
     """
@@ -204,6 +216,9 @@ def query_user_attr(username: str, attr_type: str) -> List[Tuple]:
     user = User.query.get(username)
     return getattr(user, attr_type.lower())
 
+
+def query_film(id: int) -> DatabaseType:
+    return Film.query.get(id)
 
 def query_member_from_category_by_id(category: str, id: str) -> Union[DatabaseType, None]:
     

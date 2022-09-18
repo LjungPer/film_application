@@ -322,7 +322,7 @@ def get_basic_data_from_year(username: str, year: int) -> Tuple[int, int, int, l
         else:
             nr_watches_per_film[id] = 1
 
-    nr_watches_per_film = dict(sorted(nr_watches_per_film.items(), key=lambda item: item[1], reverse=True))
+    nr_watches_per_film = sort_dictionary(nr_watches_per_film)
     top_five_watched_films = []
     for key in nr_watches_per_film:
         top_five_watched_films.append((key, nr_watches_per_film[key]))
@@ -330,3 +330,6 @@ def get_basic_data_from_year(username: str, year: int) -> Tuple[int, int, int, l
             break
 
     return nr_films, nr_rewatches, nr_reviews, top_five_watched_films
+
+def sort_dictionary(d: dict) -> dict:
+    return dict(sorted(d.items(), key=lambda item: item[1], reverse=True))
