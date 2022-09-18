@@ -20,8 +20,8 @@
         {% if 'username' in session %}
           <a id="login" href="/login">New user</a>
           <a id="home" href="/home">Home</a>
-          <a id="diary" href="/loading_diary">Diary</a>
           {% if session['updated'] is sameas true %}
+            <a id="diary" href="/loading_diary">Diary</a>
             <a id="years" href="/years">Year</a>
             <a id="director" href="/category/director">Director</a>
             <a id="actor" href="/category/actor">Actor</a>

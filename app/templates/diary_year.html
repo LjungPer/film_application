@@ -3,9 +3,9 @@
 {% block content %}
 
 <h1>User {{ session['username'] }}'s {{ year }} in summary</h1>
-<p>Logged films: {{ watches }}</p>
-<p>Rewatches: {{ rewatches }}</p>
-<p>Reviews: {{ reviews }}</p>
+<p>Logged films: {{ watch_data['total_watches'] }}</p>
+<p>Rewatches: {{ watch_data['rewatches'] }}</p>
+<p>Reviews: {{ watch_data['reviews'] }}</p>
 
 <div class="three-flex-container">
 
@@ -22,6 +22,38 @@
     </div>
 </div>
 
+<h3>Most watched directors in {{ year }}</h3>
+<div class="top-five-flex-container">
+    {% for director in top_data['directors'] %}
+        <div>
+            <p>{{ director[0] }}</p>
+            <img height="240" width="160" src={{ director[2] }}>
+            <p>{{ director[1] }} films</p>
+        </div>
+    {% endfor %}
+</div>
+
+<h3>Most watched actors in {{ year }}</h3>
+<div class="top-five-flex-container">
+    {% for actor in top_data['actors'] %}
+        <div>
+            <p>{{ actor[0] }}</p>
+            <img height="240" width="160" src={{ actor[2] }}>
+            <p>{{ actor[1] }} films</p>
+        </div>
+    {% endfor %}
+</div>
+
+<h3>Most watched actresses in {{ year }}</h3>
+<div class="top-five-flex-container">
+    {% for actress in top_data['actresses'] %}
+        <div>
+            <p>{{ actress[0] }}</p>
+            <img height="240" width="160" src={{ actress[2] }}>
+            <p>{{ actress[1] }} films</p>
+        </div>
+    {% endfor %}
+</div>
 <script>  
 
 
@@ -29,7 +61,7 @@
         labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
         datasets: [
             {
-                data: {{ months|tojson }},
+                data: {{ time_data['month']|tojson }},
                 fill: false,
                 borderColor: 'rgb(4, 170, 109)',
                 backgroundColor: 'rgba(4, 170, 109, 0.5)', 
@@ -59,10 +91,10 @@
     };
 
     const week_data = {
-        labels: Array.from({length: {{ weeks|length|tojson }}}, (_, i) => i + 1),
+        labels: Array.from({length: {{ time_data['week']|length|tojson }}}, (_, i) => i + 1),
         datasets: [
             {
-                data: {{ weeks|tojson }},
+                data: {{ time_data['week']|tojson }},
                 fill: false,
                 borderColor: 'rgb(4, 170, 109)',
                 backgroundColor: 'rgba(4, 170, 109, 0.5)', 
@@ -94,7 +126,7 @@
         labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
         datasets: [
             {
-                data: {{ weekdays|tojson }},
+                data: {{ time_data['day']|tojson }},
                 fill: false,
                 borderColor: 'rgb(4, 170, 109)',
                 backgroundColor: 'rgba(4, 170, 109, 0.5)', 

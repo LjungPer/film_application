@@ -1,6 +1,6 @@
 import re
 from bs4 import BeautifulSoup, SoupStrainer
-from app.database import extract_films_not_in_db, add_films_to_db, query_user_attr, update_db_user_category, user_is_in_db, add_user_to_db, update_db_user
+from app.database import extract_films_not_in_db, add_films_to_db, query_user_attr, update_db_user_category, user_is_in_db, add_user_to_db, update_db_user, query_member_from_category_by_id
 from app.scraping import scrape_letterboxd_urls_of_films, scrape_pages_of_user_films_by_date, get_films_page_count, get_user_avatar_src, get_diary_page_count, scrape_user_diary_pages
 import asyncio
 from app.decorators import timed
@@ -330,6 +330,19 @@ def get_basic_data_from_year(username: str, year: int) -> Tuple[int, int, int, l
             break
 
     return nr_films, nr_rewatches, nr_reviews, top_five_watched_films
+
+def get_top(d: dict, category: str, n: int=5) -> List[Tuple]:
+    d = sort_dictionary(d)
+    top = []
+    for (key, _) in zip(d, range(n)):
+        if category in ['Director', 'Actor', 'Actress']:
+            member = query_member_from_category_by_id(category, key)
+            name = member.name
+            avatar_url = member.avatar_url
+            top.append((name, d[key], avatar_url))
+        else:
+            top.append((key, d[key]))
+    return top
 
 def sort_dictionary(d: dict) -> dict:
     return dict(sorted(d.items(), key=lambda item: item[1], reverse=True))
