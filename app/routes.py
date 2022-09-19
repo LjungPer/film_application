@@ -17,6 +17,7 @@ from app.manager import (
 from app.user import update_user_statistics
 from app.fetch import get_top_category
 from app.database import (
+    extract_films_not_in_db,
     query_category_search_labels,
     query_user,
     query_user_films_from_member,
@@ -58,9 +59,6 @@ def home():
         flash('No user found. Try another username.')
         return redirect(url_for('login'))
 
-    if update_data_form.validate_on_submit():
-        return redirect(url_for('loading'))
-
     return render_template('home.html', form=update_data_form)
 
 
@@ -73,17 +71,18 @@ def categories(category_type, sorting_type):
     return jsonify(top_category_biased)
 
 
-@app.route('/loading', methods=['GET'])
-def loading():
-    return render_template('loading.html')
+@app.route('/update_user', methods=['GET', 'POST'])
+def update_user():
+    username = session['username']
+    user_films = update_user_info(username, return_logged_films=True)
+    user_films_not_in_db = extract_films_not_in_db(user_films)
 
-@app.route('/loading_diary', methods=['GET'])
-def loading_diary():
-    return render_template('loading_diary.html')
+    return jsonify(user_films_not_in_db)
 
 @app.route('/update_data', methods=['GET', 'POST'])
 def update_data():
 
+    # TODO: Remove duplication from /update_user
     username = session['username']
     user_films = update_user_info(username, return_logged_films=True)
     update_db_with_new_films(user_films)
@@ -188,8 +187,8 @@ def stat(category, id):
                             category_type=category)
 
 
-@app.route('/diary', methods=['GET', 'POST'])
-def diary():
+@app.route('/diary_form', methods=['GET', 'POST'])
+def diary_form():
     username = session['username']
     diary = query_user_attr(username, 'Diary')
     if ('diary_entries' not in session or diary is None or session['diary_entries'] != len(diary)):
@@ -205,7 +204,13 @@ def diary():
         year = year_form.name.data
         return redirect(url_for('diary_year', year=year))
 
-    return render_template('diary.html', year_form=year_form)
+    return render_template('diary_form.html', year_form=year_form)
+
+
+@app.route('/diary', methods=['GET'])
+def diary():
+    return render_template('diary.html')
+
 
 
 @app.route('/diary/<year>', methods=['GET', 'POST'])

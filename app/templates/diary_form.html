@@ -1,0 +1,27 @@
+{% block content %}
+<form action="{{ url_for('diary_form') }}" method="POST" novalidate>
+{{ year_form.hidden_tag() }}
+    <table style="text-align:center;">
+        <tr>
+            <td>
+                Search year
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>{{ year_form.name }}</td>
+            <td>{{ year_form.submit }}</td>
+        </tr>
+    </table>
+</form>
+<script>
+$(document).ready(function() {
+    $('#name').select2({  // init Select2 on form's name field
+        placeholder: "{{ year_form.name.label.text }}",
+        allowClear: true,
+        "width": "style"
+    });
+});
+</script>
+
+{% endblock %}

@@ -7,27 +7,61 @@
     <p>User {{ session['username'] }} has {{ session['pages'] }} pages of ratings.</p>
 </div>
 
-<a id="avatar" class="circle">
+<a id="avatar" class="circle" href="https://letterboxd.com/{{ session['username'] }}">
     <img height="128" width="128" src={{ session['avatar_url'] }}>
 </a>
 
-<script>
-    let tmp = document.getElementById('avatar');
-    tmp.href = "https://letterboxd.com/" + {{ session['username']|tojson }} + "/";
-</script>
 
 <div>
     <p>A simple app where you provide your letterboxd username, and we provide you with some data.</p>
 </div>
 
 <div style="margin-top: 30px;">
-    <a href="{{ url_for('loading') }}" class="buttonTest" rel="nofollow">Update data</a>
+    <a id="update_button" class="buttonTest" onclick="updateUser();">Update data</a>
 </div>
 
-<div>
+<div style="margin-top: 30px;">
     {% if session['updated'] is sameas false %}
         User data not yet synced. For more available stastistics, please sync data.
     {% endif %}
 </div>
+
+
+<script>
+    const updateUser = function () {
+        console.log('Updating user!')
+        loadingScreen.setText("Fetching user films...")
+        loadingScreen.show()
+
+        const updateUserUrl = "{{ url_for('update_user')}}"
+        fetch(updateUserUrl)
+        .then(response => {
+            if (!response.ok) {
+                loadingScreen.hide()
+                throw new Error(`Couldnt update user ${response.status}`)
+            }
+
+            response.json().then(data => {
+                const newFilmCount = data.length
+                loadingScreen.setText(`Loading ${newFilmCount} new films...`)
+            })
+            updateData()
+        })
+    }
+
+    const updateData = function () {
+        console.log('Updating data!')
+        const updateDataUrl = "{{ url_for('update_data')}}"
+        fetch(updateDataUrl)
+        .then(response => {
+            if (!response.ok) {
+                loadingScreen.hide()
+                throw new Error(`Couldnt update data ${response.status}`)
+            }
+            loadingScreen.hide()
+            window.location.replace('/home'); // reload page to update session-data    
+        })
+    }
+</script>
 
 {% endblock %}
