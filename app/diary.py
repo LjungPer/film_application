@@ -1,25 +1,23 @@
-from bs4 import BeautifulSoup
-from app.database import get_primary_key, query_user_attr, update_db_user_category, query_film
-from app.scraping import get_diary_page_count, scrape_user_diary_pages
+from app.database import film_is_in_db, get_primary_key, query_user_attr, update_db_user_category, query_film
+from app.scraping import get_diary_entries_from_scraped_pages, get_page_count_from_url, scrape_user_diary
 import asyncio
 from typing import List, Tuple, Union
 import pandas as pd
 import datetime
 import calendar
-from app.manager import get_top, sort_dictionary
-
-
+from app.manager import get_top
 
 def update_user_diary(username: str):
     diary = get_diary_entries(username)
     update_db_user_category(username, diary, 'Diary')
 
 def get_diary_entries(username: str) -> List[Tuple]:
-    num_pages = get_diary_page_count(username)
+    url = 'https://letterboxd.com/{}/films/diary/'
+    num_pages = get_page_count_from_url(url.format(username))
 
     async def inner():
-        scraped_diary_pages = await scrape_user_diary_pages(username, num_pages)
-        user_diary_entries = get_user_diary_entries_from_scraped_pages(scraped_diary_pages)
+        scraped_diary_pages = await scrape_user_diary(username, num_pages)
+        user_diary_entries = get_diary_entries_from_scraped_pages(scraped_diary_pages)
         return user_diary_entries
 
     asyncio.set_event_loop(asyncio.SelectorEventLoop())
@@ -79,20 +77,18 @@ def get_diary_info(username: str, year: int, data_type: str) -> dict:
     else:
         return data
 
-
 def get_category_diary_data_from_year(yearly_diary: dict, year: int, category_type: str) -> Union[List[Tuple], dict]:
     category = {}
     for entry in yearly_diary[year]:
         film_id = entry[0]
-        film = query_film(film_id)
-        film_category = getattr(film, category_type.lower())
+        if film_is_in_db(film_id):
+            film = query_film(film_id)
+            film_category = getattr(film, category_type.lower())
 
-        category = add_to_category(film_category, category)
+            category = add_to_category(film_category, category)
     
     return get_top(category, category_type)
     
-
-
 def add_to_category(members: list, category: dict) -> dict:
     for member in members:
         primary_key = get_primary_key(member)
@@ -101,31 +97,6 @@ def add_to_category(members: list, category: dict) -> dict:
         else:
             category[primary_key] = 1
     return category
-
-
-def get_user_diary_entries_from_scraped_pages(scraped_pages) -> List[Tuple]:
-    user_diary_entries = []
-    for current_page in scraped_pages:
-        entries_of_current_page = get_entries_of_diary_page(current_page)
-
-        for entry in entries_of_current_page:
-            user_diary_entry = create_user_diary_entry_from_scraped_entry(entry)
-            user_diary_entries.append(user_diary_entry)
-    return user_diary_entries
-
-
-def get_entries_of_diary_page(page):
-    soup = BeautifulSoup(page, 'lxml')
-    return soup.findAll('a', attrs={'class': 'edit-review-button has-icon icon-16 icon-edit'})
-
-
-def create_user_diary_entry_from_scraped_entry(entry) -> Tuple:
-    letterboxd_id = int(entry['data-film-id'])
-    title = entry['data-film-name']
-    rewatch = 1 if entry['data-rewatch'] == 'true' else 0
-    date = entry['data-viewing-date']
-    reviewed = 0 if entry['data-review-text'] == "" else 1
-    return (letterboxd_id, title, rewatch, date, reviewed)
 
 def extract_yearly_diary_data(diary):
     diary_by_year = {}
@@ -143,15 +114,6 @@ def get_year_of_diary_entry(entry):
     year = int(date_string.split("-")[0])
     return year
 
-
-def convert_date_string_to_ints(date: str) -> Tuple[int, int, int]:
-    timestamp = pd.Timestamp(date)
-    day = timestamp.dayofweek
-    week = timestamp.week
-    month = timestamp.month
-    return day, week, month
-
-        
 def number_of_weeks_of_year(year: int) -> int:
     first_day = datetime.datetime(year, 1, 1).weekday()
     if calendar.isleap(year) and first_day == 2:
@@ -159,3 +121,10 @@ def number_of_weeks_of_year(year: int) -> int:
     if first_day == 3:
         return 53
     return 52
+
+def convert_date_string_to_ints(date: str) -> Tuple[int, int, int]:
+    timestamp = pd.Timestamp(date)
+    day = timestamp.dayofweek
+    week = timestamp.week
+    month = timestamp.month
+    return day, week, month

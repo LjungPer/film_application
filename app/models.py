@@ -133,6 +133,13 @@ class Miscellaneous(db.Model):
     def __repr__(self):
         return '<Misc {}>'.format(self.title)
 
+class LbList(db.Model):
+    name = db.Column(db.String(64), primary_key=True)
+    films = db.Column(db.PickleType)
+
+    def __repr__(self):
+        return '<List {}>'.format(self.name)
+
 
 class User(db.Model):
     username = db.Column(db.String(128), primary_key=True)

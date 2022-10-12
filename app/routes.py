@@ -1,20 +1,13 @@
 from flask import render_template, flash, redirect, session, url_for, jsonify
 from app import app
-from app.diary import get_diary_info
+from app.diary import extract_yearly_diary_data, get_diary_info, update_user_diary
 from app.forms import LoginForm, UpdateDataForm, YearSearchForm, NameSearchForm
 from app.manager import (
-    extract_yearly_diary_data,
-    get_basic_data_from_year,
     get_data_for_all_of_category, 
     get_data_for_all_years,
-    get_ratings_from_films,
-    update_db_with_new_films,
-    update_user_info,
-    set_up_user,
-    get_diary_info_from_year,
-    update_user_diary
+    get_ratings_from_films
 )
-from app.user import update_user_statistics
+from app.user import set_up_user, update_user_info, update_user_statistics
 from app.fetch import get_top_category
 from app.database import (
     extract_films_not_in_db,
@@ -24,7 +17,8 @@ from app.database import (
     query_user_films_from_year,
     query_user_member_from_category,
     query_user_years,
-    query_user_attr
+    query_user_attr,
+    update_db_with_new_films
 ) 
 
 

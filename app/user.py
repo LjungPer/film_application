@@ -1,8 +1,51 @@
 from app.database import query_user_attr, update_db_user_category, query_category_of_all_db_films, get_primary_key
-from app.manager import get_diary_entries
+from app.database import user_is_in_db, add_user_to_db, update_db_user
+from app.manager import convert_films_to_ids
 from typing import Tuple, List, Union
+import asyncio
+from app.decorators import timed
 from app.categories import *
+from app.scraping import get_film_entries_from_scraped_pages, get_page_count_from_url, get_user_avatar_src, scrape_user_films
 
+
+def set_up_user(username):
+
+    if not user_is_in_db(username):
+        pages, avatar_url, logged_films = get_user_info(username)
+        logged_films_compact = convert_films_to_ids(logged_films, include_rating=True)
+        add_user_to_db(username, logged_films_compact, pages, avatar_url)
+
+def update_user_info(username, return_logged_films=False):
+
+    num_pages, avatar_url, logged_films = get_user_info(username)
+    logged_films_compact = convert_films_to_ids(logged_films, include_rating=True)
+    update_db_user(username, logged_films_compact, num_pages, avatar_url)
+    if return_logged_films:
+        return logged_films
+
+def get_user_info(username):
+
+    url = "https://letterboxd.com/{}/films/by/date"
+    num_pages = get_page_count_from_url(url.format(username))
+    avatar_url = get_user_avatar_src(username)
+    logged_films = get_user_films(username, num_pages)
+
+    return num_pages, avatar_url, logged_films
+
+@timed
+def get_user_films(username: str, num_pages: int) -> List[dict]:
+
+    async def inner():
+        pages_of_user_films_by_date = await scrape_user_films(username, num_pages)
+        user_films = get_film_entries_from_scraped_pages(pages_of_user_films_by_date)
+        return user_films
+
+    asyncio.set_event_loop(asyncio.SelectorEventLoop())
+    loop = asyncio.get_event_loop()
+    future = asyncio.ensure_future(inner())
+    user_films = loop.run_until_complete(future)
+
+    return user_films
 
 def update_user_statistics(username: str) -> None:
     update_user_category(username, 'Director')
@@ -13,12 +56,10 @@ def update_user_statistics(username: str) -> None:
     update_user_category(username, 'Genre')
     update_user_category(username, 'Language')
 
-
 def update_user_category(username: str, category_type: str) -> None:
     user_category = collect_category(username, category_type)
     category_with_attrs = add_attrs_to_category(user_category)
     update_db_user_category(username, category_with_attrs, category_type)
-
 
 def collect_category(username: str, category_type: str) -> dict:
 
@@ -39,7 +80,6 @@ def collect_category(username: str, category_type: str) -> dict:
 
     return user_categories
 
-
 def add_attrs_to_category(categories: dict) -> List[Tuple]:
 
     categories_with_attrs = []
@@ -50,7 +90,6 @@ def add_attrs_to_category(categories: dict) -> List[Tuple]:
         categories_with_attrs.append(attrs)
 
     return categories_with_attrs
-
 
 def get_category_attrs(key: Union[int, str], category: Category) -> Tuple[Union[int, str], str, float, float, int]:
 

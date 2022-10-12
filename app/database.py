@@ -1,12 +1,29 @@
 import requests
 import tmdbsimple as tmdb
+import asyncio
 from app.models import *
 from app.decorators import timed
 from sqlalchemy.inspection import inspect
 from typing import Union, List, Tuple, Set
+from app.scraping import scrape_letterboxd_urls_of_films, add_scraped_info
 
-DatabaseType = Union[Director, Country, Year, Actor, Actress, Genre, Language]
+DatabaseType = Union[Director, Country, Year, Actor, Actress, Genre, Language, User, LbList]
 
+
+def update_db_with_new_films(batch_of_films):
+
+    async def inner():
+        scrape_responses = await scrape_letterboxd_urls_of_films(films_not_in_db)
+        return scrape_responses
+
+    films_not_in_db = extract_films_not_in_db(batch_of_films)
+    asyncio.set_event_loop(asyncio.SelectorEventLoop())
+    loop = asyncio.get_event_loop()
+    future = asyncio.ensure_future(inner())
+    scrape_responses = loop.run_until_complete(future)
+
+    add_scraped_info(films_not_in_db, scrape_responses)
+    add_films_to_db(films_not_in_db)
 
 @timed
 def extract_films_not_in_db(film_objects):
@@ -220,6 +237,20 @@ def query_user_attr(username: str, attr_type: str) -> List[Tuple]:
 def query_film(id: int) -> DatabaseType:
     return Film.query.get(id)
 
+def query_list(name: str) -> DatabaseType:
+    return LbList.query.get(name)
+
+def add_list_to_db(list_name: str, list_films: List[int]):
+    db_list = LbList(name=list_name, films=list_films)
+    db.session.add(db_list)
+    db.session.commit()
+
+def update_db_list(list_name: str, list_films: List[int]):
+    lb_list = LbList.query.get(list_name)
+    lb_list.films = list_films
+    db.session.commit()
+
+
 def query_member_from_category_by_id(category: str, id: str) -> Union[DatabaseType, None]:
     
     if category == 'Director':
@@ -344,6 +375,9 @@ def query_user_member_from_category(username: str, category: str, id: str) -> Tu
 def user_is_in_db(username: str) -> bool:
     return User.query.get(username) is not None
 
+def film_is_in_db(id: int) -> bool:
+    return Film.query.get(id) is not None
+
 
 def director_is_in_db(director: dict) -> bool:
     return Director.query.get(int(director['id'])) is not None
@@ -370,3 +404,6 @@ def genre_is_in_db(genre: dict) -> bool:
 
 def language_is_in_db(language: dict) -> bool:
     return Language.query.get(language['english_name']) is not None
+
+def list_is_in_db(name: str) -> bool:
+    return LbList.query.get(name) is not None
