@@ -29,5 +29,5 @@ Possbility to enter any user's username, such that both your own and your friend
  #### First time username is entered
  Before an analysis can be made of the user's watched films, the user is prompted to update the data.
  <p align="center">
-<img src="https://github.com/LjungPer/film_application/blob/main/demo_figures/kattihatt2.jpg" data-canonical-src="https://github.com/LjungPer/film_application/blob/main/demo_figures/kattihatt2.jpg" width="958" height="455" />
+<img src="https://github.com/LjungPer/film_application/blob/main/demo_figures/kattihatt2.jpg" data-canonical-src="https://github.com/LjungPer/film_application/blob/main/demo_figures/kattihatt2.jpg" width="766" height="364" />
  </p>
