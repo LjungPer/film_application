@@ -17,21 +17,6 @@ def extract_rating(film: dict) -> Union[int, str]:
     else:
         return 'Not rated'
 
-'''
-def convert_logged_films_to_tuples(logged_films):
-
-    films_compact = []
-    for film in logged_films:
-        id = int(film['letterboxd_id'])
-        if film['rating'] is not None:
-            rating = film['rating']
-        else:
-            rating = 'Not rated'
-        tup = (id, rating)
-        films_compact.append(tup)
-    return films_compact
-'''
-
 def get_ratings_from_films(films):
     rated_films_from_year = [
         film for film in films if isinstance(film[2], int)]

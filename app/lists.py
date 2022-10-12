@@ -4,16 +4,15 @@ from app.manager import convert_films_to_ids, sort_dictionary
 from typing import Tuple
 import asyncio
 
-#lb_lists = {'1001': 'https://letterboxd.com/gubarenko/list/1001-movies-you-must-see-before-you-die-2021/',
-#            'letterboxd_250': 'https://letterboxd.com/dave/list/official-top-250-narrative-feature-films/',
-#            'imdb_250': 'https://letterboxd.com/dave/list/imdb-top-250/',
-#            'best_picture': 'https://letterboxd.com/djamesc/list/best-picture-winners-1/'
-#            }
-lb_lists = {'imdb_250': 'https://letterboxd.com/dave/list/imdb-top-250/'}
+lb_lists = {'1001': 'https://letterboxd.com/gubarenko/list/1001-movies-you-must-see-before-you-die-2021/',
+            'letterboxd_250': 'https://letterboxd.com/dave/list/official-top-250-narrative-feature-films/',
+            'imdb_250': 'https://letterboxd.com/dave/list/imdb-top-250/',
+            'best_picture': 'https://letterboxd.com/djamesc/list/best-picture-winners-1/'
+            }
 
 def list_films_seen_by_user(username: str, list_name: str) -> Tuple[float, int, int]:
     lb_list = query_list(list_name)
-    list_films = lb_list.films
+    list_films = set(lb_list.films)
     user = query_user(username)
     user_films = set([id for (id,_) in user.film])
     nr_films_seen = len(set.intersection(list_films, user_films))
