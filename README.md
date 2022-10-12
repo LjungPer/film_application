@@ -1,5 +1,5 @@
 # Letterboxd-watched-film-statistics
-A project started and developed for the purpose of computing fun, yet rigorous, statistics on people's logged film watching data. In addition, it has been used to practice the ability of structuring larger programming projects (not limited to single scripts) in an organized way, by following guidelines of clean coding. 
+A project started and developed for the purpose of computing fun, yet rigorous, statistics on people's logged film watching data. In addition, it has been used to practice the ability of structuring larger programming projects (not limited to single scripts) in an organized way, by following guidelines of clean coding. The website is currently not deployed, but a demo is provided [further down](#demo).
 
 ## Overview of application
 A website that analyses your film watching statistics based on your Letterboxd user data. The project lets the user enter any user's username from the film based social media site [Letterboxd](www.letterboxd.com), and computes interesting statistics from logged films. Examples of such include, yet not limited to:
@@ -8,4 +8,12 @@ A website that analyses your film watching statistics based on your Letterboxd u
 * List completions. Have you seen all films on [IMDb Top 250](https://www.imdb.com/chart/top/), and if not, how many films remain? What more interesting lists are you looking to complete, and what films should you watch next for this purpose?
 
 ## Implementation
-The project is implemented using Python 3.8.x along with the [Flask](https://flask.palletsprojects.com/en/2.2.x/) package for web development.
+The project is implemented using Python 3.8.x along with the [Flask](https://flask.palletsprojects.com/en/2.2.x/) package for web development. Examples of technical aspects, packages etc., that has been used, and for what purpose, include:
+* `Web scraping:` for collection of user data. Mainly implemented using the [Beautiful Soup](https://www.crummy.com/software/BeautifulSoup/bs4/doc/) package.
+* `Asynchronous programming:` to speed up scraping. Performed using the [asyncio](https://docs.python.org/3/library/asyncio.html) module.
+* `Data collecting:` information on films (titles, crew members, etc.) collected using the [TMDb](www.tmdb.com) API.
+* `Databases`: done using the ORM [SQLAlchemy](https://www.sqlalchemy.org/) via the flask extension [Flask-SQLAlchemy](https://flask-sqlalchemy.palletsprojects.com/en/3.0.x/).
+* `Web desgin:` basics done with HTML, with design choices using JavaScript and CSS.
+
+
+## Demo
