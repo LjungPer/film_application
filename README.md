@@ -18,13 +18,15 @@ The project is implemented using Python 3.8.x along with the [Flask](https://fla
 
 ## Demo
 
-##### Login user
+Below follows a demo of the website's current state.
+
+#### Login user
 Possbility to enter any user's username, such that both your own and your friends data can be analysed.
 <p align="center">
 <img src="https://github.com/LjungPer/film_application/blob/main/demo_figures/login.jpg" data-canonical-src="https://github.com/LjungPer/film_application/blob/main/demo_figures/login.jpg" width="511" height="248" />
  </p>
  
- ##### First time username entered
+ #### First time username is entered
  Before an analysis can be made of the user's watched films, the user is prompted to update the data.
  <p align="center">
 <img src="https://github.com/LjungPer/film_application/blob/main/demo_figures/kattihatt2.jpg" data-canonical-src="https://github.com/LjungPer/film_application/blob/main/demo_figures/kattihatt2.jpg" width="958" height="455" />
