@@ -58,3 +58,21 @@ Click "Director", and similar choices as for the year charts appear. One can cho
   <p align="center">
 <img src="https://github.com/LjungPer/film_application/blob/main/demo_figures/spec_director.jpg" data-canonical-src="https://github.com/LjungPer/film_application/blob/main/demo_figures/spec_director.jpg" width="706" height="430" />
  </p>
+
+#### Example 3: Diary data
+Here, the user can check how much film that has been seen each year, including number of rewatches, and possible number of reviews the user has given. We also the what days the user watch films, what weeks, what months, etc.
+  <p align="center">
+<img src="https://github.com/LjungPer/film_application/blob/main/demo_figures/diary.jpg" data-canonical-src="https://github.com/LjungPer/film_application/blob/main/demo_figures/diary.jpg" width="933" height="247" />
+ </p>
+ 
+Furthermore, the user gets data on most watched directors, actors, actresses, etc., from a specific year. 
+  <p align="center">
+<img src="https://github.com/LjungPer/film_application/blob/main/demo_figures/most_watched_crew.jpg" data-canonical-src="https://github.com/LjungPer/film_application/blob/main/demo_figures/most_watched_crew.jpg" width="751" height="974" />
+ </p>
+ 
+ ## Future work
+ 
+ Future work for the project includes:
+ * List demo. Will include demo of the list completion aspect of the website. Features implemented, but yet not incorporated into the UI. 
+ * Design choices. Current design is merely temporary and only used as a somewhat workable design for testing the implemented features. When the features have reached a steady level, some design choices will be considered and implemented for the website. This incldues color schemes, graph positions, placement of statistics, etc.
+ * Deployment. When the website is steadily working, it might be deployed and tested for a wider audience. 
