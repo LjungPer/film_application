@@ -54,7 +54,7 @@ Click "Director", and similar choices as for the year charts appear. One can cho
 <img src="https://github.com/LjungPer/film_application/blob/main/demo_figures/director_stats.jpg" data-canonical-src="https://github.com/LjungPer/film_application/blob/main/demo_figures/director_stats.jpg" width="689" height="500" />
  </p>
  
- Further curious about a specific director? For example, why did not Ingmar Bergman appear in the top 10 for user kattihatt2? We can check Ingmar Bergman specifically.
+ Further curious about a specific director? For example, why did not Ingmar Bergman appear in the top 10 for user kattihatt2? We can check Ingmar Bergman specifically. Here we see we can see kattihatt2's rating distribution over Bergman, including the possibility of check the rating for each film, etc. 
   <p align="center">
-<img src="https://github.com/LjungPer/film_application/blob/main/demo_figures/.jpg" data-canonical-src="https://github.com/LjungPer/film_application/blob/main/demo_figures/.jpg" width="706" height="430" />
+<img src="https://github.com/LjungPer/film_application/blob/main/demo_figures/spec_director.jpg" data-canonical-src="https://github.com/LjungPer/film_application/blob/main/demo_figures/spec_director.jpg" width="706" height="430" />
  </p>
