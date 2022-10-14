@@ -38,16 +38,23 @@ A navigation bar appear at top of the page where the user may choose what type o
 <img src="https://github.com/LjungPer/film_application/blob/main/demo_figures/navbar.jpg" data-canonical-src="https://github.com/LjungPer/film_application/blob/main/demo_figures/navbar.jpg" width="607" height="67" />
  </p>
  
- #### Example: Data from films by release year
+ #### Example 1: Data from films by release year
+ By clicking "Year" in the navigation bar, the user may choose between three different types of measures to see what year released the best films according to the user. The three measures are:
+ * `Average:` Purely calculated as the average rating of the films seen from each year.
+ * `Bias:` This measure takes into account both the average rating, as well as the number of films seen. Since, if one has seen 1 film from 1954 and gave it a 9/10, is it really the user's favorite film year? If one thinks so, simply use average rating. If not, this measure is a neat alternative.
+ * `Number of films:` Simply the number of films seen from each year.
  
- <p align="left">
-  <img src="https://github.com/LjungPer/film_application/blob/main/demo_figures/average_year.jpg" data-canonical-src="https://github.com/LjungPer    /film_application/blob/main/demo_figures/average_year.jpg" width="365" height="222" />
-</p>
- 
-<p align="center">
- <img src="https://github.com/LjungPer/film_application/blob/main/demo_figures/bias_rating_per_year.jpg" data-canonical-src="https://github.com/LjungPer/film_application/blob/main/demo_figures/bias_rating_per_year.jpg" width="365" height="222" />
-</p>
+| Average rating | Bias rating | Number of films |
+| -------------- | ----------- | --------------- |
+|<img src="https://github.com/LjungPer/film_application/blob/main/demo_figures/average_year.jpg" data-canonical-src="https://github.com/LjungPer    /film_application/blob/main/demo_figures/average_year.jpg" width="365" height="222" />|<img src="https://github.com/LjungPer/film_application/blob/main/demo_figures/bias_rating_per_year.jpg" data-canonical-src="https://github.com/LjungPer/film_application/blob/main/demo_figures/bias_rating_per_year.jpg" width="365" height="222" />|<img src="https://github.com/LjungPer/film_application/blob/main/demo_figures/number_of_films_per_year.jpg" data-canonical-src="https://github.com/LjungPer/film_application/blob/main/demo_figures/number_of_films_per_year.jpg" width="365" height="222" />|
 
-<p align="right">
- <img src="https://github.com/LjungPer/film_application/blob/main/demo_figures/number_of_films_per_year.jpg" data-canonical-src="https://github.com/LjungPer/film_application/blob/main/demo_figures/number_of_films_per_year.jpg" width="365" height="222" />
-</p>
+#### Example 2: Favorite director
+Click "Director", and similar choices as for the year charts appear. One can choose between same measures as above. Below is an example of user kattihatt2's favorite directors by bias measure.
+ <p align="center">
+<img src="https://github.com/LjungPer/film_application/blob/main/demo_figures/director_stats.jpg" data-canonical-src="https://github.com/LjungPer/film_application/blob/main/demo_figures/director_stats.jpg" width="689" height="500" />
+ </p>
+ 
+ Further curious about a specific director? For example, why did not Ingmar Bergman appear in the top 10 for user kattihatt2? We can check Ingmar Bergman specifically.
+  <p align="center">
+<img src="https://github.com/LjungPer/film_application/blob/main/demo_figures/specific_director.jpg" data-canonical-src="https://github.com/LjungPer/film_application/blob/main/demo_figures/specific_director.jpg" width="706" height="430" />
+ </p>
