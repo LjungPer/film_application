@@ -31,3 +31,23 @@ Possbility to enter any user's username, such that both your own and your friend
  <p align="center">
 <img src="https://github.com/LjungPer/film_application/blob/main/demo_figures/kattihatt2.jpg" data-canonical-src="https://github.com/LjungPer/film_application/blob/main/demo_figures/kattihatt2.jpg" width="766" height="364" />
  </p>
+
+#### When data up to date
+A navigation bar appear at top of the page where the user may choose what type of statistics they wish to check out.
+ <p align="center">
+<img src="https://github.com/LjungPer/film_application/blob/main/demo_figures/navbar.jpg" data-canonical-src="https://github.com/LjungPer/film_application/blob/main/demo_figures/navbar.jpg" width="607" height="67" />
+ </p>
+ 
+ #### Example: Data from films by release year
+ 
+ <p align="left">
+  <img src="https://github.com/LjungPer/film_application/blob/main/demo_figures/average_year.jpg" data-canonical-src="https://github.com/LjungPer    /film_application/blob/main/demo_figures/average_year.jpg" width="365" height="222" />
+</p>
+ 
+<p align="center">
+ <img src="https://github.com/LjungPer/film_application/blob/main/demo_figures/bias_rating_per_year.jpg" data-canonical-src="https://github.com/LjungPer/film_application/blob/main/demo_figures/bias_rating_per_year.jpg" width="365" height="222" />
+</p>
+
+<p align="right">
+ <img src="https://github.com/LjungPer/film_application/blob/main/demo_figures/number_of_films_per_year.jpg" data-canonical-src="https://github.com/LjungPer/film_application/blob/main/demo_figures/number_of_films_per_year.jpg" width="365" height="222" />
+</p>
