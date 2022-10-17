@@ -1,5 +1,5 @@
-# Letterboxd-watched-film-statistics
-A project started and developed for the purpose of computing fun, yet rigorous, statistics on people's logged film watching data. In addition, it has been used to practice the ability of structuring larger programming projects (not limited to single scripts) in an organized way, by following guidelines of clean coding. The website is currently not deployed, but a demo is provided [further down](#demo).
+# Letterboxd watched film statistics
+A project started and developed for the purpose of computing fun, yet rigorous, statistics on people's logged film watching data. In addition, it has been used to practice the ability of structuring larger programming projects (not limited to single scripts) in an organized way, by following guidelines of clean coding. The website is currently not deployed, but a showcase is provided [further down](#showcase).
 
 ## Overview of application
 A website that analyses your film watching statistics based on your Letterboxd user data. The project lets the user enter any user's username from the film based social media site [Letterboxd](www.letterboxd.com), and computes interesting statistics from logged films. Examples of such include, yet not limited to:
@@ -16,9 +16,9 @@ The project is implemented using Python 3.8.x along with the [Flask](https://fla
 * `Web desgin:` basics done with HTML, with design choices using JavaScript and CSS.
 
 
-## Demo
+## Showcase
 
-Below follows a demo of the website's current state.
+Below follows a showcase of the website's current state.
 
 #### Login user
 Possbility to enter any user's username, such that both your own and your friends data can be analysed.
